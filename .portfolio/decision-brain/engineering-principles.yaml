@@ -1,0 +1,108 @@
+version: 1
+principle: "Architecture only counts when coupling is controlled, dependencies point inward, and behavior is easy to test."
+required_decision_fields:
+  - coupling_boundary
+  - dependency_direction
+  - solid_application
+  - simplicity_rule
+  - abstraction_rule
+  - testability_evidence
+  - rejected_overengineering
+terms:
+  lsp_note: "When the user says LISP in architecture principles, treat it as LSP: Liskov Substitution Principle, part of SOLID. Lisp the language is not an architecture principle here."
+core_rules:
+  decoupling:
+    definition: "Business rules must not depend on frameworks, databases, cloud SDKs, queues, HTTP, GraphQL, CLI, or UI rendering."
+    required_patterns:
+      - ports_and_adapters
+      - dependency_inversion
+      - thin_controllers_resolvers_handlers
+      - use_cases_or_application_services
+      - external_services_behind_interfaces
+    forbidden_in_domain:
+      - http_request_or_response_types
+      - orm_entities_when_they_leak_persistence
+      - cloud_sdk_clients
+      - message_broker_clients
+      - framework_annotations_when_they_force_runtime_dependency
+      - environment_variable_reads
+      - logging_or_metrics_clients_as_business_dependencies
+    evidence:
+      - use_cases_test_without_http_server
+      - use_cases_test_without_database_or_broker
+      - adapters_have_contract_tests
+      - dependency_tree_shows_inward_direction
+  solid:
+    srp:
+      name: Single Responsibility Principle
+      rule: "A module/class/function should have one reason to change. Split orchestration, validation, persistence, transport, and domain rules."
+      smell: "service object that validates input, talks to database, publishes messages, and formats HTTP response"
+    ocp:
+      name: Open Closed Principle
+      rule: "Add new adapters, strategies, policies, or handlers without rewriting stable domain/use-case code."
+      smell: "large if/else chains for providers, payment methods, storage backends, or scoring policies"
+    lsp:
+      name: Liskov Substitution Principle
+      rule: "Implementations of a port must be substitutable without surprising callers. Same contract, same error semantics, same invariants."
+      smell: "fake adapter passes tests but real adapter changes behavior, nullability, ordering, idempotency, or error mapping"
+    isp:
+      name: Interface Segregation Principle
+      rule: "Prefer small capability-specific ports instead of broad god interfaces."
+      smell: "StorageClient with upload, query, publish, delete, auth, metrics, and unrelated methods"
+    dip:
+      name: Dependency Inversion Principle
+      rule: "High-level policy depends on abstractions; low-level details implement them."
+      smell: "use case directly instantiates Prisma, AWS SDK, RabbitMQ channel, Kafka producer, SQLAlchemy session, or HTTP client"
+  kiss:
+    name: Keep It Simple, Stupid
+    rule: "Pick the simplest design that proves the claim and benchmark. Avoid architecture theater."
+    evidence:
+      - fewer moving parts in default Docker path
+      - no broker/cloud/database unless decision brain justifies it
+      - README has one clear run path
+    smell: "microservices, Kafka, GraphQL, Kubernetes, or CQRS added without benchmark need"
+  yagni:
+    name: You Aren't Gonna Need It
+    rule: "Do not add extension points for futures that the repo does not prove."
+    smell: "provider abstractions for five clouds when only Kumo/AWS is needed"
+  dry:
+    name: Don't Repeat Yourself
+    rule: "Remove duplication of business rules and contracts, but do not abstract incidental similarity too early."
+    smell: "premature generic base classes or helpers that hide the domain language"
+  cohesion:
+    rule: "Keep code that changes together together. Split modules by business capability when domain is meaningful."
+  composition_over_inheritance:
+    rule: "Prefer composition, policies, strategies, and adapters over inheritance trees."
+  law_of_demeter:
+    rule: "Avoid deep object chains and leaking internals across boundaries."
+architecture_gates:
+  clean_architecture:
+    must_show:
+      - entities_or_domain_model_without_framework_dependency
+      - use_cases_without_transport_dependency
+      - infra_implements_ports
+  hexagonal:
+    must_show:
+      - inbound_ports_or_use_cases
+      - outbound_ports
+      - adapters_in_and_out
+      - substitutable_local_and_real_adapters
+  modular_monolith:
+    must_show:
+      - module_boundaries
+      - no_cross_module_database_reaching
+      - shared_kernel_kept_small
+  pipeline:
+    must_show:
+      - explicit_stage_contracts
+      - reproducible_inputs_outputs
+      - no_hidden_global_state
+validation_checklist:
+  - domain_has_no_framework_imports
+  - application_has_no_cloud_or_broker_sdk_imports
+  - controllers_resolvers_handlers_are_thin
+  - ports_are_small_and_named_by_capability
+  - adapters_are_replaceable_in_tests
+  - LSP_contract_tests_exist_for_multiple_adapters_when_applicable
+  - no_extra_infrastructure_without_decision_brain_reason
+  - benchmark_still_runs_from_clean_docker_path

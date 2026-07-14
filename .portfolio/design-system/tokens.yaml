@@ -1,0 +1,38 @@
+version: 1
+brand:
+  name: "Guilherme Brilhante Portfolio"
+  voice: "technical, measurable, direct"
+colors:
+  ink: "#111827"
+  surface: "#F9FAFB"
+  border: "#D1D5DB"
+  accent: "#2563EB"
+  success: "#059669"
+  warning: "#D97706"
+  danger: "#DC2626"
+typography:
+  readme_heading: "short, claim-first, no marketing filler"
+  table_density: "compact"
+  code_font: "monospace"
+components:
+  readme_header:
+    required_items: [project_number, project_name, claim, benchmark_status]
+  benchmark_card:
+    required_items: [metric, value, command, dataset_or_fixture, date]
+  architecture_card:
+    required_items: [style, reason, dependency_rule, rejected_alternatives]
+  program_badge:
+    required_items: [program_id, program_name]
+  references_table:
+    required_columns: [source, license, reused_idea, copied_code]
+diagrams:
+  style: "simple boxes, named boundaries, visible dependency direction"
+  required_for: [clean-architecture, hexagonal, modular-monolith, event-driven, cqrs-event-sourcing, pipeline]
+dashboards:
+  default_panels: [throughput, latency, error_rate, benchmark_result]
+readme_rules:
+  - open with number, claim, and current benchmark result or pending status
+  - show one reproducible command before deep explanation
+  - include architecture decision summary
+  - include references and reuse disclosure
+  - avoid generic landing-page prose

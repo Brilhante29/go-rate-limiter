@@ -1,0 +1,20 @@
+language: terraform
+applies_to: [infrastructure, aws, baseline, devops]
+package_layout:
+  default: modules, environments, examples
+  tests: tests_or_checks
+required_tooling:
+  - terraform_fmt
+  - terraform_validate
+  - tflint
+  - checkov
+architecture_mapping:
+  infrastructure-modules: [modules, environments/dev, examples, policies]
+benchmark_rules:
+  - measure provision time when safe
+  - include plan validation output
+  - avoid requiring paid cloud resources for default smoke path
+readme_rules:
+  - show module graph
+  - include required variables table
+  - include cost and cleanup notes

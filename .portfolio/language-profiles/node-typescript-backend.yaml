@@ -1,0 +1,88 @@
+profile: node-typescript-backend
+language: typescript
+runtime: nodejs
+applies_to: [backend, nestjs, graphql, rest-api, bff, realtime-api, fullstack-backend]
+public_signal: "TypeScript/Node backend with NestJS-style modular architecture, typed contracts, tests, Prisma, API style decision, and benchmark evidence"
+reference_style:
+  rocketseat:
+    use_for:
+      - NestJS modular organization
+      - Clean Architecture boundaries
+      - domain/application/infra separation
+      - Prisma/Test/Vitest style examples
+    do_not_copy:
+      - course code
+      - exercises
+      - fixtures
+      - project-specific names
+package_layout:
+  default: src
+  modules: src/domain/<context>
+  core: src/core
+  infra: src/infra
+  tests: test_or_src_colocated
+recommended_architectures:
+  - clean-architecture
+  - modular-monolith
+  - hexagonal
+  - layered
+api_decisions:
+  default: rest-http
+  use_rest_when:
+    - CRUD or command-style API
+    - OpenAPI contract and simple HTTP operations are enough
+    - public integration surface benefits from HTTP caching/status codes
+  use_graphql_when:
+    - frontend needs flexible nested reads
+    - schema-driven client experience is part of the proof
+    - BFF aggregates multiple sources
+    - query complexity and N+1 controls will be implemented
+  use_websocket_when:
+    - bidirectional real-time behavior is central
+  use_sse_when:
+    - server-to-client updates are enough
+http_runtime_decisions:
+  default_adapter: express
+  use_fastify_when:
+    - p95/p99 HTTP performance is part of the benchmark
+    - required middleware works with Fastify
+    - adapter-specific behavior is documented
+persistence_decisions:
+  default: prisma
+  use_prisma_when:
+    - type-safe database client and migrations support the proof
+    - project follows Rocketseat/Nest clean patterns
+  use_drizzle_when:
+    - SQL visibility and lightweight query layer matter more than Prisma ergonomics
+  use_typeorm_when:
+    - ORM decorators or legacy Nest ecosystem fit the project better
+required_tooling:
+  - nodejs-lts
+  - typescript_strict
+  - nestjs_when_structured_backend
+  - prisma_default
+  - zod_or_class-validator_by_boundary
+  - vitest_or_jest
+  - supertest
+  - eslint
+  - prettier
+  - pino_or_winston
+  - k6_for_http
+  - graphql_codegen_when_graphql
+quality_gates:
+  - no framework imports in domain entities
+  - use cases tested without HTTP server
+  - controllers/resolvers thin and mapped to use cases
+  - DTO/schema validation at boundaries
+  - OpenAPI or GraphQL schema exported when relevant
+  - benchmark JSON generated under benchmarks/results
+benchmark_rules:
+  - REST: p95_latency_ms, endpoint_throughput_rps, payload_bytes
+  - GraphQL: query_latency_ms, payload_bytes_saved, resolver_count, n_plus_one_guard
+  - WebSocket/SSE: message_or_event_latency_ms, concurrent_connections
+readme_rules:
+  - show module tree
+  - state REST vs GraphQL decision
+  - state Express vs Fastify decision
+  - include Prisma/migration command when persistence exists
+  - include benchmark result table

@@ -1,0 +1,59 @@
+programs:
+  - id: ai-evaluation-retrieval
+    name: AI Evaluation and Retrieval Systems
+    narrative: "Build measurable RAG, embedding, prompt, agent, and inference evaluation systems."
+    problem: "Teams need objective answers about LLM quality, retrieval quality, cost, and latency."
+    projects: [2, 3, 8, 9, 10, 30]
+    shared_assets:
+      - evaluation datasets
+      - benchmark result schema
+      - prompt/result tables
+      - cost and latency reporting
+    portfolio_story: "From evaluation harness to production-aware retrieval and inference decisions."
+  - id: applied-computer-vision
+    name: Applied Computer Vision and Medical AI
+    narrative: "Train, evaluate, serve, and benchmark visual models for real-world tasks."
+    problem: "Computer vision projects need reproducible training, measurable quality, and deployable serving paths."
+    projects: [1, 4, 5, 6, 7]
+    shared_assets:
+      - dataset cards
+      - confusion matrix templates
+      - latency per image benchmark
+      - serving benchmark table
+    portfolio_story: "From model training to domain-specific evaluation and API serving."
+  - id: backend-reliability-platform
+    name: Backend Reliability and Architecture Platform
+    narrative: "Show production backend patterns through measurable reliability, latency, and consistency."
+    problem: "Backend systems need clear boundaries, integration safety, performance, and failure handling."
+    projects: [11, 12, 13, 14, 15, 16, 17, 18, 19, 20]
+    shared_assets:
+      - architecture ADRs
+      - load tests
+      - contract tests
+      - failure scenarios
+      - p95/p99 latency dashboards
+    portfolio_story: "From clean boundaries to distributed consistency and resilience patterns."
+  - id: mlops-data-platform
+    name: MLOps and Data Platform
+    narrative: "Move models and data from experiment to monitored, validated, production-like workflows."
+    problem: "ML systems fail when training, features, data quality, drift, and streaming are not connected."
+    projects: [21, 22, 23, 26, 28]
+    shared_assets:
+      - model registry conventions
+      - feature schemas
+      - data quality checks
+      - drift reports
+      - streaming benchmarks
+    portfolio_story: "From training to features, validation, drift, and streaming operation."
+  - id: delivery-observability-infra
+    name: Delivery, Observability, and Infrastructure
+    narrative: "Standardize delivery, telemetry, infrastructure, and performance evidence across repositories."
+    problem: "Portfolio projects need repeatable CI, provisioning, observability, and load testing."
+    projects: [24, 25, 27, 29]
+    shared_assets:
+      - GitHub Actions templates
+      - dashboards
+      - Terraform checks
+      - k6 load profiles
+      - release checklist
+    portfolio_story: "From automated delivery to measurable operations and infrastructure."

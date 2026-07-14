@@ -1,0 +1,19 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "PortfolioBenchmarkResult",
+  "type": "object",
+  "required": ["project", "metric", "value", "unit", "timestamp", "command"],
+  "properties": {
+    "project": { "type": "string" },
+    "metric": { "type": "string" },
+    "value": { "type": "number" },
+    "unit": { "type": "string" },
+    "timestamp": { "type": "string" },
+    "command": { "type": "string" },
+    "repeat": { "type": "integer" },
+    "samples": { "type": "array", "items": { "type": "number" } },
+    "summary": { "type": "object", "additionalProperties": { "type": "number" } },
+    "environment": { "type": "object", "additionalProperties": { "type": "string" } }
+  },
+  "additionalProperties": true
+}

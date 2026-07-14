@@ -1,0 +1,211 @@
+projects:
+  - id: 1
+    name: yolo-training-pipeline
+    domain: computer-vision
+    stack: [python, pytorch, ultralytics, opencv, docker]
+    proves: treino e inferencia de deteccao
+    benchmark: mAP e latency_ms_per_image
+    reuse_from: [ultralytics, opencv]
+  - id: 2
+    name: llm-eval-harness
+    domain: llm-eval
+    stack: [python, typer, pydantic, pytest, docker]
+    proves: avaliacao objetiva de RAG/LLM
+    benchmark: exact_match, f1, latency_ms
+    reuse_from: [openai-cookbook, mlflow]
+  - id: 3
+    name: rag-knowledge-base
+    domain: rag
+    stack: [python, fastapi, qdrant, sentence-transformers, docker]
+    proves: RAG do zero com busca vetorial
+    benchmark: recall_at_k, latency_ms, cost_per_query
+    reuse_from: [qdrant-examples, openai-cookbook, sentence-transformers]
+  - id: 4
+    name: stroke-signal-demo
+    domain: medical-ml
+    stack: [python, pandas, scikit-learn, matplotlib, docker]
+    proves: reproducao de classificador clinico
+    benchmark: accuracy, confusion_matrix
+    reuse_from: [scikit-learn]
+  - id: 5
+    name: alpr-mercosul
+    domain: ocr
+    stack: [python, opencv, ultralytics, paddleocr, docker]
+    proves: leitura de placa Mercosul
+    benchmark: character_accuracy, plate_accuracy
+    reuse_from: [paddleocr, ultralytics]
+  - id: 6
+    name: melanoma-classifier
+    domain: medical-vision
+    stack: [python, pytorch, timm, scikit-learn, docker]
+    proves: classificacao de lesao de pele
+    benchmark: auc, sensitivity
+    reuse_from: [pytorch, timm]
+  - id: 7
+    name: vision-serving-fastapi
+    domain: model-serving
+    stack: [python, fastapi, onnxruntime, prometheus, k6, docker]
+    proves: servir modelo CV
+    benchmark: throughput_rps, p95_latency_ms
+    reuse_from: [fastapi, onnxruntime, k6]
+  - id: 8
+    name: embeddings-benchmark
+    domain: retrieval
+    stack: [python, sentence-transformers, faiss, qdrant, docker]
+    proves: comparacao de modelos de embedding
+    benchmark: recall_at_k, indexing_time_ms, query_time_ms
+    reuse_from: [sentence-transformers, faiss, qdrant]
+  - id: 9
+    name: llm-agent-eval
+    domain: agents
+    stack: [python, langgraph, pytest, mlflow, docker]
+    proves: agentes avaliados por tarefa
+    benchmark: task_success_rate, cost_per_task
+    reuse_from: [mlflow, langgraph]
+  - id: 10
+    name: prompt-ab-testing
+    domain: prompt-eval
+    stack: [python, typer, duckdb, scipy, docker]
+    proves: comparacao estatistica de prompts
+    benchmark: score_by_variant, confidence_interval
+    reuse_from: [mlflow, openai-cookbook]
+  - id: 11
+    name: spring-hexagonal-payments
+    domain: backend
+    stack: [java21, spring-boot, postgresql, flyway, testcontainers, k6, docker]
+    proves: arquitetura hexagonal em pagamentos
+    benchmark: coverage_percent, p99_latency_ms
+    reuse_from: [buckpal, spring-petclinic, testcontainers]
+  - id: 12
+    name: go-rate-limiter
+    domain: backend
+    stack: [go, redis, chi, k6, docker]
+    proves: rate limiter distribuido
+    benchmark: accepted_rps, rejected_rps, p95_latency_ms
+    reuse_from: [envoy-ratelimit, uber-ratelimit]
+  - id: 13
+    name: mini-aws-emulator
+    domain: cloud-emulation
+    stack: [go, sqlite, aws-sdk, docker]
+    proves: emulacao minima de APIs AWS
+    benchmark: conformance_tests_passed
+    reuse_from: [localstack]
+  - id: 14
+    name: event-sourcing-orders
+    domain: backend
+    stack: [java21, spring-boot, postgresql, redpanda, docker]
+    proves: event sourcing e CQRS
+    benchmark: events_per_second
+    reuse_from: [event-sourcing-patterns]
+  - id: 15
+    name: grpc-vs-rest-bench
+    domain: protocol-benchmark
+    stack: [go, grpc, chi, ghz, k6, docker]
+    proves: comparacao REST vs gRPC
+    benchmark: latency_ms_by_protocol
+    reuse_from: [grpc-examples, k6]
+  - id: 16
+    name: saga-orchestrator
+    domain: distributed-systems
+    stack: [java21, spring-boot, postgresql, docker]
+    proves: transacoes distribuidas com compensacao
+    benchmark: consistency_rate
+    reuse_from: [saga-patterns]
+  - id: 17
+    name: multi-tenant-starter
+    domain: backend
+    stack: [java21, spring-boot, postgresql, flyway, docker]
+    proves: multi-tenant real
+    benchmark: tenant_onboarding_seconds
+    reuse_from: [spring-security, postgresql-rls]
+  - id: 18
+    name: api-gateway-lite
+    domain: gateway
+    stack: [go, reverse-proxy, redis, opentelemetry, k6, docker]
+    proves: gateway com auth, rate limit e observabilidade
+    benchmark: overhead_ms
+    reuse_from: [envoy-ratelimit, opentelemetry-demo]
+  - id: 19
+    name: cache-strategies-bench
+    domain: caching
+    stack: [java21, spring-boot, redis, postgresql, k6, docker]
+    proves: cache-aside vs write-through
+    benchmark: hit_ratio, p95_latency_ms
+    reuse_from: [redis-patterns]
+  - id: 20
+    name: outbox-pattern
+    domain: reliability
+    stack: [java21, spring-boot, postgresql, redpanda, docker]
+    proves: outbox transacional
+    benchmark: lost_messages_under_failure
+    reuse_from: [transactional-outbox-patterns]
+  - id: 21
+    name: mlops-end2end
+    domain: mlops
+    stack: [python, mlflow, fastapi, prometheus, docker]
+    proves: treino, registro, deploy e monitoramento
+    benchmark: time_to_production_minutes
+    reuse_from: [mlflow]
+  - id: 22
+    name: model-drift-detector
+    domain: mlops
+    stack: [python, pandas, scipy, prometheus, docker]
+    proves: deteccao de drift
+    benchmark: drift_alarm_vs_baseline
+    reuse_from: [evidently-patterns]
+  - id: 23
+    name: feature-store-lite
+    domain: data-platform
+    stack: [python, fastapi, postgresql, redis, docker]
+    proves: feature store minima
+    benchmark: online_read_latency_ms
+    reuse_from: [feast-patterns]
+  - id: 24
+    name: ci-cd-templates
+    domain: devops
+    stack: [github-actions, docker-buildx, trivy, k6]
+    proves: pipelines reutilizaveis
+    benchmark: build_time_seconds
+    reuse_from: [actions-starter-workflows]
+  - id: 25
+    name: observability-stack
+    domain: observability
+    stack: [go, prometheus, grafana, opentelemetry, docker-compose]
+    proves: observabilidade ponta a ponta
+    benchmark: simulated_mttr_minutes
+    reuse_from: [opentelemetry-demo]
+  - id: 26
+    name: data-quality-checks
+    domain: data-quality
+    stack: [python, pandera, duckdb, polars, docker]
+    proves: validacao objetiva de dados
+    benchmark: rejected_rows_percent
+    reuse_from: [pandera]
+  - id: 27
+    name: terraform-aws-baseline
+    domain: infrastructure
+    stack: [terraform, aws, tflint, checkov]
+    proves: baseline AWS como codigo
+    benchmark: provision_time_seconds
+    reuse_from: [terraform-aws-modules]
+  - id: 28
+    name: kafka-streams-demo
+    domain: streaming
+    stack: [java21, kafka-streams, redpanda, testcontainers, docker]
+    proves: processamento streaming
+    benchmark: messages_per_second
+    reuse_from: [kafka-streams-examples]
+  - id: 29
+    name: load-test-suite
+    domain: performance
+    stack: [k6, javascript, docker]
+    proves: suite reutilizavel de carga
+    benchmark: p95_curve
+    reuse_from: [grafana-k6]
+  - id: 30
+    name: cost-aware-inference
+    domain: llmops
+    stack: [python, fastapi, litellm, ollama, duckdb, docker]
+    proves: custo e latencia local vs API
+    benchmark: cost_per_1k_tokens, latency_ms
+    reuse_from: [mlflow, litellm, ollama]

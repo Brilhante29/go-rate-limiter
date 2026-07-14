@@ -1,0 +1,58 @@
+profile: fastapi-backend
+language: python
+runtime: asgi
+applies_to: [backend, ai-api, rag-api, ml-serving, data-api, evaluation-api]
+public_signal: "FastAPI backend for typed Python APIs, ML/data integration, OpenAPI, async I/O, and benchmarked serving"
+package_layout:
+  default: src/<package_name>
+  api: src/<package_name>/api
+  application: src/<package_name>/application
+  domain: src/<package_name>/domain
+  infrastructure: src/<package_name>/infrastructure
+  tests: tests
+recommended_architectures:
+  - layered
+  - clean-architecture
+  - hexagonal
+  - pipeline
+runtime_decisions:
+  server: uvicorn
+  workers_rule: "Use multiple workers for production-like load tests when CPU or blocking calls exist."
+  async_rule: "Use async only when dependencies are async end to end. Do not mark handlers async around blocking work."
+  cpu_bound_rule: "Move CPU-bound ML/image work to batch, worker, process pool, or model server when it hurts API latency."
+persistence_decisions:
+  default: sqlalchemy-2
+  async_postgresql: asyncpg
+  migrations: alembic
+  use_sqlmodel_when:
+    - small CRUD demo
+    - teaching clarity matters more than persistence complexity
+required_tooling:
+  - fastapi
+  - uvicorn
+  - pydantic-v2
+  - pydantic-settings
+  - sqlalchemy-2
+  - alembic
+  - httpx
+  - pytest
+  - pytest-asyncio
+  - ruff
+  - mypy_when_reasonable
+  - structlog
+  - prometheus-client
+quality_gates:
+  - OpenAPI generated and linked in README
+  - contract models separate from domain models when domain is non-trivial
+  - async DB session not shared across concurrent tasks
+  - benchmark JSON generated under benchmarks/results
+benchmark_rules:
+  - use k6 for HTTP API load
+  - report throughput_rps and p95_latency_ms
+  - report cost_per_query for AI/RAG APIs
+  - include cold start or model load note when relevant
+readme_rules:
+  - include /docs or OpenAPI note
+  - include Docker command
+  - include fixture/dataset note
+  - include benchmark result table

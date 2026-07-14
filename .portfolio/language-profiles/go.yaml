@@ -1,0 +1,21 @@
+language: go
+applies_to: [backend, gateway, emulator, protocol-benchmark, observability]
+package_layout:
+  default: cmd/<app>, internal/<domain>, pkg_when_reusable
+  tests: colocated *_test.go
+required_tooling:
+  - go test
+  - golangci-lint_when_available
+  - docker
+architecture_mapping:
+  layered: [cmd, internal/http, internal/service, internal/store]
+  hexagonal: [cmd, internal/domain, internal/ports, internal/adapters]
+  event-driven: [cmd, internal/contracts, internal/producers, internal/consumers]
+benchmark_rules:
+  - include go test benchmarks when useful
+  - include k6 or ghz for API/protocol projects
+  - report allocation or latency when it supports the claim
+readme_rules:
+  - show command entrypoints
+  - show API/protocol contract path
+  - include load test command

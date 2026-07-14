@@ -1,0 +1,188 @@
+version: 1
+principle: "Pick the stack that best proves the problem, benchmark, and public proficiency signal. Never choose by language name alone."
+required_decision_fields:
+  - problem_forces
+  - public_signal
+  - selected_stack_profile
+  - selected_runtime
+  - selected_libraries
+  - rejected_stacks
+  - benchmark_impact
+profiles:
+  spring-kotlin-backend:
+    public_signal: "enterprise backend with Kotlin, Spring, architecture boundaries, tests, and production observability"
+    use_when:
+      - rich domain rules or transactional workflows
+      - payments, orders, reliability, multi-tenant, outbox, CQRS, saga, or compliance-like flows
+      - recruiter should see Spring ecosystem plus Kotlin fluency
+      - Testcontainers and integration tests are part of the evidence
+    default_runtime:
+      web_stack: spring-webmvc
+      reason: "Use Spring MVC first for transactional REST APIs and blocking persistence."
+    use_webflux_when:
+      - end-to-end non-blocking I/O is actually present
+      - outbound network I/O dominates request time
+      - the benchmark measures predictable scaling under slow I/O
+    avoid_webflux_when:
+      - persistence and clients are blocking
+      - the project mainly demonstrates domain architecture or transactional consistency
+    core_libraries:
+      - spring-boot
+      - kotlin-jvm
+      - gradle-kotlin-dsl
+      - spring-web
+      - spring-validation
+      - spring-data-jdbc_or_jpa_by_problem
+      - flyway
+      - postgresql
+      - testcontainers
+      - junit5
+      - kotest_or_assertj
+      - mockk
+      - micrometer
+      - spring-boot-actuator
+    benchmark_fit:
+      - p95_latency_ms
+      - p99_latency_ms
+      - coverage_percent
+      - transaction_consistency_rate
+  fastapi-backend:
+    public_signal: "Python backend for AI/data products with typed APIs, OpenAPI, async I/O, and Dockerized benchmarks"
+    use_when:
+      - backend wraps ML, CV, RAG, evaluation, embeddings, or data workflows
+      - OpenAPI contract and fast iteration are part of the value
+      - async I/O with databases, HTTP clients, or queues matters
+      - Python ecosystem is required by the domain
+    avoid_when:
+      - CPU-bound low-latency backend is the main evidence and work cannot be offloaded
+      - strict enterprise JVM transaction stack is the point
+    core_libraries:
+      - fastapi
+      - uvicorn
+      - pydantic-v2
+      - pydantic-settings
+      - sqlalchemy-2
+      - asyncpg_when_postgresql_async
+      - alembic
+      - httpx
+      - pytest
+      - pytest-asyncio
+      - ruff
+      - mypy_when_reasonable
+      - structlog
+      - prometheus-client
+    benchmark_fit:
+      - throughput_rps
+      - p95_latency_ms
+      - openapi_contract_coverage
+      - cost_per_query
+  go-backend:
+    public_signal: "Go backend for low overhead services, gateways, rate limiters, emulators, and protocol benchmarks"
+    use_when:
+      - low memory, low overhead, concurrency, networking, or protocol handling are part of the claim
+      - gateway, rate limiter, emulator, load-test helper, or infrastructure service
+      - benchmark should show requests per second, p95/p99, allocations, or CPU profile
+    default_router:
+      choice: net/http_plus_chi
+      reason: "Start with standard library compatibility and idiomatic composability."
+    use_gin_when:
+      - route middleware ecosystem or common REST ergonomics matter more than minimalism
+      - benchmark or project constraints justify the dependency
+    use_fiber_when:
+      - fasthttp compatibility is acceptable
+      - raw HTTP throughput is the claim and net/http middleware compatibility is not required
+    core_libraries:
+      - net-http
+      - chi_default_router
+      - pgx_for_postgresql
+      - sqlc_when_sql_contracts_should_be_visible
+      - goose_or_atlas_for_migrations
+      - redis-go-redis_when_needed
+      - slog_or_zerolog_for_structured_logs
+      - testcontainers-go_when_integration_tests_need_services
+      - k6_or_ghz_for_load_tests
+      - pprof_for_profiles
+    benchmark_fit:
+      - throughput_rps
+      - p95_latency_ms
+      - p99_latency_ms
+      - allocs_per_operation
+      - cpu_profile_summary
+  node-typescript-backend:
+    public_signal: "TypeScript/Node backend with NestJS modular architecture, REST/GraphQL contracts, Prisma, tests, and benchmark evidence"
+    reference_style: "Rocketseat NestJS Clean Architecture organization: core/domain/application/infra/test boundaries."
+    use_when:
+      - TypeScript backend proficiency should be explicit
+      - NestJS-style modular architecture, dependency injection, guards, pipes, providers, and tests strengthen the proof
+      - API contract decision between REST, GraphQL, WebSocket/SSE, or gRPC is part of the evidence
+      - Prisma/type-safe persistence is a good fit for the project
+      - BFF, dashboard backend, GraphQL schema, or product API is central
+    avoid_when:
+      - low-level protocol performance is better shown in Go
+      - transactional enterprise JVM ecosystem is the main signal
+      - Python ML/data ecosystem is required by the domain
+    default_api_style: rest-http
+    use_graphql_when:
+      - client needs flexible nested reads
+      - BFF aggregates multiple sources
+      - schema-driven client workflow is part of the proof
+      - query complexity and N+1 controls will be implemented
+    default_http_adapter: express
+    use_fastify_when:
+      - p95/p99 performance is part of the benchmark
+      - middleware compatibility is checked
+    core_libraries:
+      - nodejs-lts
+      - typescript-strict
+      - nestjs
+      - prisma_default
+      - zod_or_class-validator_by_boundary
+      - vitest_or_jest
+      - supertest
+      - eslint
+      - prettier
+      - pino_or_winston
+      - graphql_when_selected
+      - k6_for_http
+    benchmark_fit:
+      - p95_latency_ms
+      - endpoint_throughput_rps
+      - query_latency_ms
+      - payload_bytes
+  angular:
+    public_signal: "enterprise frontend with modular UI, forms, guards, and dashboard workflows"
+    use_when:
+      - admin/dashboard frontend has complex forms or enterprise patterns
+      - typed forms, route guards, services, facades, and feature modules are part of the proof
+  nextjs:
+    public_signal: "React/Next.js product frontend with public demo quality and rendering tradeoffs"
+    use_when:
+      - public UI, dashboard, demo, docs site, or portfolio-facing app matters
+      - SSR/ISR, route structure, and polish are part of the proof
+  python-ml:
+    public_signal: "Python ML/data system with reproducible experiments and measurable model/data quality"
+    use_when:
+      - training, evaluation, drift, feature store, data validation, or RAG is the core problem
+      - MLflow, Airflow, notebooks, or model registry are justified by the workflow
+  terraform:
+    public_signal: "infrastructure as code with validation, security checks, and reproducible provisioning"
+    use_when:
+      - infrastructure module, AWS baseline, security checks, or provision-time benchmark is the claim
+selection_rules:
+  default_backend_api:
+    prefer: [spring-kotlin-backend, fastapi-backend, go-backend, node-typescript-backend]
+    decide_by:
+      domain_transactions: spring-kotlin-backend
+      ai_data_python_ecosystem: fastapi-backend
+      low_overhead_networking: go-backend
+      typescript_contracts_or_bff: node-typescript-backend
+  performance_claim:
+    prefer: [go-backend, spring-kotlin-backend]
+    note: "Use a benchmark to justify framework choice. Do not claim performance from reputation."
+  ml_serving_claim:
+    prefer: [fastapi-backend]
+    note: "Use Go or JVM only when the project proves serving infrastructure rather than ML workflow."
+  enterprise_backend_claim:
+    prefer: [spring-kotlin-backend]
+  gateway_or_emulator_claim:
+    prefer: [go-backend]

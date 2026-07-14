@@ -1,0 +1,37 @@
+profile: nextjs
+language: typescript
+applies_to: [frontend, fullstack-web, portfolio-ui, dashboard, public-product]
+proves:
+  - production-grade React with routing and rendering strategy
+  - API boundary design when backend-for-frontend is needed
+  - SEO/readability for public project pages
+  - polished GitHub/LinkedIn demo surface
+package_layout:
+  default: app
+  components: components
+  features: features/<feature>
+  server: server_or_lib/server
+  tests: tests_or_colocated
+required_tooling:
+  - nextjs
+  - react
+  - typescript_strict
+  - eslint
+  - prettier
+  - playwright_when_ui_is_part_of_claim
+architecture_mapping:
+  component-driven: [app, components, features, lib]
+  mvvm: [models, view-models, views, services]
+  layered: [app, server, lib, data]
+benchmark_rules:
+  - include Lighthouse metrics for public UI
+  - include route latency when server rendering is part of the claim
+  - include interaction latency for dashboard workflows
+readme_rules:
+  - include rendered route map
+  - include screenshot or short demo gif when UI is the artifact
+  - include build and preview commands
+linkedin_signal:
+  - "React/Next.js product frontend"
+  - "SSR/ISR/rendering tradeoffs"
+  - "polished public demo"

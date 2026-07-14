@@ -1,0 +1,79 @@
+version: 1
+principle: "Choose API style from client access patterns, contract needs, latency profile, team ergonomics, and benchmark evidence."
+required_decision_fields:
+  - selected_api_style
+  - client_shape
+  - contract_source_of_truth
+  - rejected_styles
+  - performance_risk
+  - benchmark
+styles:
+  rest-http:
+    use_when:
+      - resource-oriented CRUD or command API
+      - public/simple integration surface
+      - HTTP caching, status codes, OpenAPI, and operational simplicity matter
+      - clients need predictable endpoint contracts more than flexible graph traversal
+    avoid_when:
+      - clients repeatedly overfetch or underfetch nested graphs
+      - frontend needs many combinations of related entities in one screen
+    contract: openapi
+    benchmark_fit: [p95_latency_ms, endpoint_throughput_rps, payload_bytes]
+  graphql:
+    use_when:
+      - client needs flexible selection of fields and nested relationships
+      - multiple frontend screens need different shapes from the same domain graph
+      - schema-driven product API and type-safe client workflow are part of the proof
+      - aggregating multiple backing services behind one client-facing schema is useful
+    avoid_when:
+      - API is simple CRUD or command-heavy with fixed payloads
+      - caching/CDN/simple observability are more important than query flexibility
+      - query cost, N+1, auth by field, or complexity limits cannot be handled
+    contract: graphql_schema
+    required_controls:
+      - schema ownership decision
+      - query complexity or depth limit
+      - DataLoader or batching plan for N+1 prevention
+      - field-level auth rule when sensitive fields exist
+      - persisted queries or operation allowlist when public
+    benchmark_fit: [query_latency_ms, payload_bytes_saved, resolver_count, n_plus_one_guard]
+  grpc:
+    use_when:
+      - service-to-service communication is central
+      - strongly typed protobuf contracts and low overhead binary transport matter
+      - streaming RPC or protocol comparison is part of the benchmark
+    avoid_when:
+      - browser-first public API is the main interface
+      - human-debuggable HTTP/JSON is more important
+    contract: protobuf
+    benchmark_fit: [latency_ms_by_protocol, throughput_rps, payload_bytes]
+  websocket:
+    use_when:
+      - bidirectional real-time communication is required
+      - presence, collaboration, live dashboard, or interactive workflow is central
+    avoid_when:
+      - server-to-client updates are enough and SSE is simpler
+    contract: event_contracts
+    benchmark_fit: [message_latency_ms, concurrent_connections, dropped_messages]
+  sse:
+    use_when:
+      - server-to-client streaming updates are enough
+      - browser compatibility and operational simplicity matter
+      - client does not need bidirectional messaging
+    avoid_when:
+      - client must send frequent real-time messages on the same channel
+    contract: event_contracts
+    benchmark_fit: [event_latency_ms, concurrent_connections]
+  cli:
+    use_when:
+      - project is a harness, benchmark tool, generator, local automation, or dev tool
+      - API surface is command flags and output files
+    contract: command_help_and_output_schema
+    benchmark_fit: [runtime_seconds, output_schema_valid]
+rules:
+  default_public_api: rest-http
+  default_node_product_api: rest-http
+  use_graphql_only_with_schema_value: true
+  every_graphql_project_requires_complexity_control: true
+  every_api_style_requires_benchmark: true
+  do_not_mix_rest_and_graphql_without_reason: true

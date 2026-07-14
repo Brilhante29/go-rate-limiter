@@ -1,0 +1,34 @@
+language: python
+applies_to: [ai, ml, data, rag, benchmark, fastapi]
+package_layout:
+  default: src/<package_name>
+  tests: tests
+  benchmarks: benchmarks
+required_tooling:
+  - pytest
+  - ruff
+  - mypy_when_reasonable
+  - pydantic_for_contracts
+  - mlflow_when_experiment_tracking_is_part_of_claim
+  - airflow_when_orchestration_is_part_of_claim
+  - docker
+stack_addons:
+  mlflow:
+    use_when: [experiment_tracking, model_registry, run_comparison, model_lifecycle]
+  airflow:
+    use_when: [scheduled_pipeline, dependency_graph, retries, backfills, orchestration]
+  notebooks:
+    rule: explanation_allowed_but_not_default_runtime
+architecture_mapping:
+  pipeline: [stages, artifacts, benchmarks, tests]
+  clean-architecture: [domain, application, infra, tests]
+  hexagonal: [domain, application/ports, adapters, tests]
+  layered: [api, services, repositories, tests]
+benchmark_rules:
+  - benchmark command must write JSON under benchmarks/results
+  - fixtures must be small enough for Docker default path
+  - random seeds must be explicit for ML/data demos
+readme_rules:
+  - include dataset or fixture description
+  - include metric definitions
+  - include CPU/GPU note when relevant

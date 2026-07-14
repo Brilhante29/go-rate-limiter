@@ -1,0 +1,66 @@
+version: 1
+name: reuse-improvement-loop
+purpose: >
+  Force every project cycle to ask whether the portfolio reuse kit should be
+  improved, then either patch the kit immediately, record a backlog item, or
+  explicitly reject the improvement.
+
+trigger_points:
+  - after_project_scaffold
+  - after_architecture_decision
+  - after_first_working_slice
+  - after_benchmark_result
+  - before_publication
+  - after_ci_failure
+
+review_questions:
+  - Did this project reveal a repeated decision that should move into the kit?
+  - Did this project need a template, schema, script, Docker pattern, benchmark helper, or skill that future projects will also need?
+  - Did any agent instruction feel ambiguous enough to cause a bad implementation choice?
+  - Did local-first execution require a reusable adapter, fixture, or parity-test pattern?
+  - Did the benchmark produce a metric or result shape missing from the shared registry/schema?
+  - Did the design-system or README structure fail to express the proof clearly?
+  - Did validation miss a defect that should become a reusable gate?
+
+classification:
+  patch_now:
+    criteria:
+      - low-risk change
+      - clearly reusable across at least two projects or foundational for the current program
+      - improves template, schema, validation, skill, docs, harness, or decision matrix
+    action: update portfolio-reuse-kit, validate, commit, and push before publishing the dependent project
+  backlog:
+    criteria:
+      - useful but cross-cutting
+      - requires broader design
+      - may break existing generated projects
+    action: record in sdd/reuse-improvement-review.md with owner and next decision point
+  reject:
+    criteria:
+      - project-specific implementation
+      - premature abstraction
+      - duplicates existing kit capability
+      - hides the concept the project exists to prove
+    action: document rejection briefly
+
+outputs:
+  project_review: sdd/reuse-improvement-review.md
+  optional_kit_patch:
+    - decision-brain/*
+    - docs/*
+    - templates/*
+    - sdd/templates/*
+    - harness/*
+    - metrics/*
+    - contracts/*
+    - .codex/skills/*
+    - .claude/skills/*
+
+rules:
+  - Do not upstream project-specific business code.
+  - Do not create abstractions for hypothetical future needs.
+  - Prefer improving validation when a mistake is easy to repeat.
+  - Prefer improving templates when setup friction appears in more than one project.
+  - Prefer improving skills when agent behavior becomes ambiguous.
+  - Prefer improving decision matrices when a stack/tool choice required new reasoning.
+  - A project can only be published as portfolio-ready after the reuse improvement review is complete.

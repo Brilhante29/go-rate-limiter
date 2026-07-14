@@ -1,0 +1,81 @@
+version: 1
+principle: "Use a broker only when the problem needs broker semantics. Otherwise prefer synchronous calls, database transactions, or transactional outbox."
+required_decision_fields:
+  - selected_messaging_mode
+  - reason
+  - delivery_guarantee
+  - ordering_need
+  - replay_need
+  - retry_dlq_strategy
+  - rejected_alternatives
+modes:
+  none:
+    use_when:
+      - synchronous request/response is enough
+      - no async recovery, fanout, buffering, or decoupling is needed
+      - a broker would only add Docker and operational cost
+    evidence:
+      - simpler docker-compose
+      - lower local demo complexity
+      - p95 latency without broker hop
+  outbox-only:
+    use_when:
+      - database transaction must atomically record work to publish later
+      - project proves reliability but does not require a full broker in default path
+      - async worker can poll the outbox table
+    evidence:
+      - zero_lost_messages_under_failure
+      - replay_from_outbox_table
+  rabbitmq:
+    use_when:
+      - work queues, routing, per-message ack, retry, DLQ, delayed retry, or task distribution are central
+      - consumers process jobs and completion matters more than event replay
+      - topology needs exchanges, queues, bindings, or routing keys
+    choose_quorum_queues_when:
+      - replicated durable queues are required
+      - poison message handling or at-least-once dead-lettering is part of the proof
+    avoid_when:
+      - long-term event retention, replay, stream processing, or partitioned event logs are central
+    evidence:
+      - job_success_rate
+      - retry_count
+      - dlq_count
+      - consumer_lag_seconds
+  kafka:
+    use_when:
+      - event streaming, durable event logs, replay, partitions, consumer groups, or stream processing are central
+      - CQRS projections, event sourcing, CDC, analytics, or high-throughput event pipelines are the proof
+      - multiple consumers need to read the same events independently
+    local_default: redpanda_for_docker_simplicity
+    avoid_when:
+      - the project only needs a simple task queue or request buffering
+      - local demo would be dominated by broker setup instead of the claim
+    evidence:
+      - messages_per_second
+      - consumer_lag_ms
+      - replay_time_seconds
+      - projection_lag_ms
+  redis-streams:
+    use_when:
+      - lightweight local stream/queue is enough
+      - Redis is already required for cache/rate limiting and persistence needs are modest
+    avoid_when:
+      - strong broker semantics, complex routing, or long replay history are central
+    evidence:
+      - stream_lag
+      - pending_entries
+  nats:
+    use_when:
+      - lightweight pub/sub or request/reply is the core problem
+      - low operational overhead matters and Kafka/RabbitMQ semantics are not needed
+    avoid_when:
+      - portfolio claim specifically needs Kafka/RabbitMQ ecosystem skill
+    evidence:
+      - message_latency_ms
+      - subscriber_fanout_count
+rules:
+  do_not_add_broker_for_resume_padding: true
+  every_broker_requires_benchmark: true
+  every_broker_requires_failure_case: true
+  kafka_requires_topic_partition_decision: true
+  rabbitmq_requires_exchange_queue_binding_decision: true

@@ -1,0 +1,90 @@
+version: 1
+principle: "Choose stacks that prove the user's public proficiency, while still fitting the project problem."
+public_profile:
+  github: "repositories must show measurable engineering, clean organization, and repeatable commands"
+  linkedin: "posts should translate benchmark results into business/engineering claims"
+reference_styles:
+  paulescu:
+    source: "https://github.com/Paulescu"
+    use_for:
+      - progressive ML learning path
+      - problem-by-problem chapters
+      - README as teaching surface
+      - community-facing clarity
+    do_not_copy:
+      - course text
+      - notebooks
+      - images
+      - repository-specific implementation
+backend:
+  spring-kotlin-backend:
+    use_when:
+      - enterprise backend signal matters
+      - transactional domain, consistency, payments, orders, multi-tenant, outbox, saga, or CQRS are central
+      - Kotlin fluency should be visible with Spring ecosystem depth
+    public_signal: "Kotlin + Spring backend with architecture, transactions, tests, and observability"
+  fastapi-backend:
+    use_when:
+      - Python backend is connected to ML, data, RAG, CV, model serving, or evaluation
+      - OpenAPI, Pydantic contracts, async I/O, and fast API iteration are part of the proof
+    public_signal: "FastAPI backend for AI/data products with typed contracts and benchmarks"
+  go-backend:
+    use_when:
+      - gateways, rate limiters, emulators, protocol benchmarks, networking, or low overhead services are central
+      - performance should be proven with p95/p99, allocation, pprof, or throughput evidence
+    public_signal: "Go backend for low-overhead services and measured performance"
+  node-typescript-backend:
+    use_when:
+      - TypeScript backend, NestJS, GraphQL, BFF, or product API skill should be visible
+      - Rocketseat-style modular Clean Architecture organization strengthens the portfolio signal
+      - Prisma/type-safe contracts/tests are part of the proof
+    public_signal: "TypeScript/Node backend with NestJS, clean boundaries, typed API contracts, and benchmark evidence"
+front_end:
+  angular:
+    use_when:
+      - enterprise dashboard or admin surface
+      - typed forms, validation, auth guards, and modular features are part of the proof
+      - the repo should signal enterprise frontend experience
+    avoid_when:
+      - public landing/demo polish is more important than enterprise structure
+    public_signal: "Angular enterprise UI with modular architecture"
+  nextjs:
+    use_when:
+      - public demo, portfolio surface, dashboard, or product-like web app
+      - SEO, route rendering, and polished UI matter
+      - React proficiency should be explicit
+    avoid_when:
+      - the project is backend-only and a simple static README proves enough
+    public_signal: "React/Next.js product frontend with measurable UX"
+data_and_ml:
+  python:
+    default_tools:
+      - pandas
+      - polars_when_large_local_data
+      - scikit-learn
+      - pytorch_when_deep_learning
+      - fastapi_when_serving
+      - pydantic_for_contracts
+  mlflow:
+    use_when:
+      - experiments, model registry, metrics comparison, or reproducibility are part of the claim
+      - LinkedIn post needs visible run comparison or model lifecycle evidence
+    public_signal: "experiment tracking and model lifecycle"
+  airflow:
+    use_when:
+      - orchestration, scheduled pipelines, dependencies, retries, or backfills are part of the problem
+      - the repo proves data platform or MLOps workflow, not just a notebook
+    avoid_when:
+      - a single local script is enough for the benchmark
+    public_signal: "data/ML pipeline orchestration"
+  notebooks:
+    use_when:
+      - teaching, exploration, or ML walkthrough is useful
+    rule: "notebooks are allowed as explanation, but production path must also have scripts, tests, and Docker"
+stack_decision_order:
+  - problem_to_solve
+  - portfolio_program
+  - public_proficiency_signal
+  - architecture
+  - decision_brain_stack_profile
+  - benchmark_and_post_angle

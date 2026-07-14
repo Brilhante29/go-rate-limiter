@@ -1,0 +1,82 @@
+version: 1
+principle: "Prefer boring, well-supported libraries unless the benchmark or portfolio claim requires a sharper tool."
+selection_order:
+  - standard_library_or_framework_builtin
+  - official_project_library
+  - mature_ecosystem_library
+  - specialized_library_with_benchmark_reason
+  - custom_code_only_for_project_core
+libraries:
+  spring-kotlin-backend:
+    web:
+      default: spring-webmvc
+      alternative: spring-webflux
+      rule: "WebFlux only when end-to-end non-blocking I/O is part of the problem."
+    persistence:
+      default: spring-data-jdbc
+      use_jpa_when: [complex_relationship_mapping, enterprise_orm_signal]
+      use_r2dbc_when: [webflux_end_to_end_non_blocking]
+      migrations: flyway
+    tests:
+      unit: [junit5, kotest_or_assertj, mockk]
+      integration: [spring-boot-testcontainers, testcontainers]
+    observability: [spring-boot-actuator, micrometer]
+  fastapi-backend:
+    api: [fastapi, uvicorn]
+    validation: [pydantic-v2, pydantic-settings]
+    persistence:
+      default: sqlalchemy-2
+      async_postgresql: asyncpg
+      migrations: alembic
+      use_sqlmodel_when: [small_crud_demo, teaching_simplicity]
+    http_client: httpx
+    tests: [pytest, pytest-asyncio]
+    observability: [structlog, prometheus-client]
+  go-backend:
+    http_router:
+      default: net-http_plus_chi
+      alternatives: [gin, fiber]
+    persistence:
+      postgresql: pgx
+      typed_sql: sqlc
+      migrations: [goose, atlas]
+    cache: redis-go-redis
+    observability: [slog, pprof, prometheus_client_golang]
+    tests: [go-test, testcontainers-go]
+    load: [k6, ghz]
+  node-typescript-backend:
+    framework:
+      default: nestjs
+      use_raw_fastify_when: [tiny_service, benchmark_requires_minimal_framework]
+      use_express_direct_when: [small_http_adapter_or_teaching_demo]
+    http_adapter:
+      default: express
+      alternative: fastify
+      rule: "Fastify only when p95/p99 benchmark or deployment constraints justify checking compatibility."
+    api_style:
+      rest: [nestjs_controllers, openapi_swagger]
+      graphql: [nestjs_graphql, apollo_default, mercurius_when_fastify_selected, graphql_codegen]
+      websocket: [nestjs_websockets]
+    persistence:
+      default: prisma
+      alternative: drizzle
+      rule: "Prisma for type-safe app development and migrations; Drizzle when SQL visibility is the proof."
+    validation:
+      boundary_default: class-validator
+      functional_schema: zod
+    tests: [vitest_or_jest, supertest, testcontainers_when_external_services_exist]
+    observability: [pino_or_winston, prom-client, nestjs_terminus]
+  messaging:
+    rabbitmq_clients:
+      spring: spring-amqp
+      python: aio-pika_or_pika_by_async_need
+      go: amqp091-go
+    kafka_clients:
+      spring: spring-kafka
+      python: aiokafka_or_confluent_kafka_by_need
+      go: segmentio_kafka-go_or_confluent_kafka_go_by_need
+rejection_rules:
+  - reject libraries that hide the concept the repo is supposed to prove
+  - reject dependencies that make Docker default path heavy without improving evidence
+  - reject async libraries when the rest of the stack remains blocking
+  - reject ORMs for protocol/emulator projects where explicit data contracts are clearer

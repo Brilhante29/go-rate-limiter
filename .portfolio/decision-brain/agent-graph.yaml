@@ -1,0 +1,337 @@
+version: 1
+name: portfolio-agent-graph
+purpose: >
+  Define how a principal agent, specialist subagents, the decision brain,
+  local-first runtime, benchmark harness, validation, and publication flow work
+  together to produce portfolio repositories with repeatable engineering evidence.
+
+execution_model:
+  default: principal-agent-orchestrated
+  multi_agent_runtime: optional
+  fallback: sequential-subagent-roles
+  rule: >
+    If Codex, Claude Code, or another tool cannot spawn subagents, the principal
+    agent must execute each subagent responsibility in order and record the same
+    decisions and evidence.
+
+source_of_truth:
+  portfolio_catalog: catalog/projects.yaml
+  programs: catalog/programs.yaml
+  proficiency_map: catalog/proficiency.yaml
+  architecture_matrix: architecture/decision-matrix.yaml
+  decision_brain:
+    - decision-brain/engineering-principles.yaml
+    - decision-brain/stack-matrix.yaml
+    - decision-brain/api-style-matrix.yaml
+    - decision-brain/messaging-matrix.yaml
+    - decision-brain/cloud-matrix.yaml
+    - decision-brain/library-selection.yaml
+  language_profiles: language-profiles/*.yaml
+  design_system: design-system/tokens.yaml
+  metric_registry: metrics/registry.yaml
+  reuse_improvement_loop: decision-brain/reuse-improvement-loop.yaml
+  schemas:
+    - contracts/project.schema.json
+    - contracts/benchmark-result.schema.json
+
+orchestrator:
+  id: principal-agent
+  owns:
+    - user objective
+    - project scope
+    - subagent sequencing
+    - conflict resolution
+    - final validation
+    - publication decision
+  must_not_skip:
+    - architecture decision
+    - engineering principles review
+    - stack decision
+    - local-first decision
+    - benchmark plan
+    - reuse improvement review
+    - release gates
+  outputs:
+    - project.yaml
+    - README.md
+    - sdd/spec.md
+    - sdd/architecture-decision.md
+    - sdd/technical-decision.md
+    - sdd/benchmark-plan.md
+    - sdd/agent-handoff.md
+    - sdd/reuse-improvement-review.md
+
+subagents:
+  - id: program-planner
+    mission: Fit the repository into a portfolio program instead of treating it as an isolated demo.
+    reads:
+      - catalog/programs.yaml
+      - catalog/projects.yaml
+      - catalog/proficiency.yaml
+    writes:
+      - project.yaml:program
+      - sdd/spec.md:portfolio-fit
+    rejects:
+      - standalone-project-with-no-program-story
+
+  - id: architecture-selector
+    mission: Select the architecture that matches problem forces, not personal stack preference.
+    reads:
+      - architecture/decision-matrix.yaml
+    writes:
+      - project.yaml:architecture
+      - sdd/architecture-decision.md
+    checks:
+      - dependency-direction
+      - boundary-ownership
+      - rejected-alternatives
+
+  - id: engineering-principles-reviewer
+    mission: Enforce decoupling, SOLID, LSP, KISS, YAGNI, DRY, dependency inversion, and testability evidence.
+    reads:
+      - decision-brain/engineering-principles.yaml
+    writes:
+      - project.yaml:decision_brain.principles
+      - sdd/technical-decision.md:principles
+    checks:
+      - domain-has-no-framework-imports
+      - ports-before-adapters
+      - local-and-real-adapters-share-contracts
+      - no-unproven-overengineering
+
+  - id: stack-decision-agent
+    mission: Choose the concrete stack profile that proves the project claim and benchmark.
+    reads:
+      - decision-brain/stack-matrix.yaml
+      - catalog/proficiency.yaml
+      - language-profiles/*.yaml
+    writes:
+      - project.yaml:language_profile
+      - project.yaml:decision_brain.stack_profile
+      - sdd/technical-decision.md:stack
+    rejects:
+      - stack-chosen-only-by-habit
+      - framework-that-hides-the-core-proof
+
+  - id: api-style-agent
+    mission: Decide REST, GraphQL, gRPC, WebSocket, SSE, or CLI from caller needs and benchmark shape.
+    reads:
+      - decision-brain/api-style-matrix.yaml
+    writes:
+      - project.yaml:decision_brain.api_style
+      - api-contract-or-cli-contract
+    checks:
+      - graphql-complexity-controls-when-graphql
+      - grpc-contract-tests-when-grpc
+      - http-contract-and-openapi-when-rest
+
+  - id: cloud-local-first-agent
+    mission: Keep default execution local-first and make real cloud pluggable through adapters.
+    reads:
+      - decision-brain/cloud-matrix.yaml
+      - https://github.com/sivchari/kumo
+    writes:
+      - project.yaml:decision_brain.cloud
+      - docker-compose.yml-or-local-runtime-docs
+      - adapter-contract-tests
+    checks:
+      - no-secret-required-default-path
+      - kumo-for-aws-like-local-behavior
+      - real-cloud-sdk-stays-outside-domain-and-use-cases
+
+  - id: messaging-agent
+    mission: Decide whether the project needs no broker, outbox, RabbitMQ, Kafka, Redis Streams, or NATS.
+    reads:
+      - decision-brain/messaging-matrix.yaml
+    writes:
+      - project.yaml:decision_brain.messaging
+      - sdd/technical-decision.md:messaging
+      - failure-mode-benchmark
+    rejects:
+      - broker-without-async-semantics
+      - kafka-without-replay-or-streaming-need
+      - rabbitmq-without-routing-retry-or-dlq-need
+
+  - id: language-profile-agent
+    mission: Apply framework-specific repository layout, testing, Docker, linting, and benchmark conventions.
+    reads:
+      - language-profiles/*.yaml
+    writes:
+      - repository-layout
+      - test-structure
+      - docker-path
+      - ci-workflow
+    checks:
+      - follows-selected-profile
+      - no-stack-specific-rules-leaking-into-domain
+
+  - id: benchmark-harness-agent
+    mission: Turn the project claim into a reproducible number.
+    reads:
+      - metrics/registry.yaml
+      - contracts/benchmark-result.schema.json
+      - harness/bench.py
+    writes:
+      - sdd/benchmark-plan.md
+      - benchmarks/results/*.json
+      - README.md:benchmark-table
+    checks:
+      - command-is-reproducible
+      - metric-unit-and-direction-are-clear
+      - result-is-not-handwritten
+
+  - id: design-system-agent
+    mission: Keep README, diagrams, badges, benchmark tables, and dashboards visually consistent across repositories.
+    reads:
+      - design-system/tokens.yaml
+      - design-system/README.md
+    writes:
+      - README.md
+      - docs-diagrams
+      - benchmark-presentation
+    checks:
+      - first-screen-shows-number-claim-benchmark
+      - diagrams-match-the-architecture
+
+  - id: security-reuse-reviewer
+    mission: Prevent secret leakage, hidden paid dependencies, unclear reuse, and copied implementation.
+    reads:
+      - catalog/reuse-policy.md
+      - REFERENCES.md
+      - release checklist
+    writes:
+      - REFERENCES.md
+      - sdd/release-checklist.md
+    checks:
+      - no-token-in-files-or-remote-url
+      - default-demo-has-no-paid-secret
+      - reuse-is-attributed-as-pattern-dependency-or-reference
+
+  - id: reuse-improvement-reviewer
+    mission: Ask whether project work should improve the portfolio reuse kit, then patch, backlog, or reject the improvement.
+    reads:
+      - decision-brain/reuse-improvement-loop.yaml
+      - project evidence
+      - validation failures
+    writes:
+      - sdd/reuse-improvement-review.md
+      - optional portfolio-reuse-kit patch
+    checks:
+      - patch-low-risk-reusable-improvements-now
+      - backlog-broad-or-risky-improvements
+      - reject-project-specific-or-premature-abstractions
+
+  - id: release-ci-publisher
+    mission: Validate, commit, push, and keep the repository publishable.
+    reads:
+      - tools/validate-kit.ps1
+      - .github/workflows/*
+      - sdd/templates/release-checklist.md
+    writes:
+      - validation-output
+      - git-commit
+      - github-publication
+    gates:
+      - tests-pass
+      - benchmark-result-present
+      - README-has-number-and-result
+      - references-complete
+      - no-forbidden-legacy-naming
+
+edges:
+  - from: user
+    to: principal-agent
+    handoff: objective-and-constraints
+  - from: principal-agent
+    to: program-planner
+    handoff: project-id-name-and-portfolio-goal
+  - from: program-planner
+    to: architecture-selector
+    handoff: program-fit-and-problem-forces
+  - from: architecture-selector
+    to: engineering-principles-reviewer
+    handoff: architecture-boundaries-and-dependency-rule
+  - from: engineering-principles-reviewer
+    to: stack-decision-agent
+    handoff: coupling-principles-and-testability-rules
+  - from: stack-decision-agent
+    to: api-style-agent
+    handoff: selected-language-profile-and-runtime
+  - from: api-style-agent
+    to: cloud-local-first-agent
+    handoff: transport-contract-and-runtime-needs
+  - from: cloud-local-first-agent
+    to: messaging-agent
+    handoff: local-runtime-and-integration-forces
+  - from: messaging-agent
+    to: language-profile-agent
+    handoff: stack-api-cloud-messaging-decisions
+  - from: language-profile-agent
+    to: benchmark-harness-agent
+    handoff: runnable-layout-and-claim
+  - from: benchmark-harness-agent
+    to: design-system-agent
+    handoff: measured-result-and-benchmark-context
+  - from: design-system-agent
+    to: security-reuse-reviewer
+    handoff: docs-and-reuse-surface
+  - from: security-reuse-reviewer
+    to: reuse-improvement-reviewer
+    handoff: docs-reuse-and-validation-surface
+  - from: reuse-improvement-reviewer
+    to: release-ci-publisher
+    handoff: kit-improvement-status-and-release-readiness
+  - from: release-ci-publisher
+    to: principal-agent
+    handoff: validation-result-and-publish-status
+
+local_first:
+  default_runtime: docker
+  default_cloud_for_aws_like_behavior: kumo
+  local_services:
+    - local-database
+    - local-vector-store
+    - local-object-storage
+    - local-queue-or-stream-when-needed
+    - benchmark-results-volume
+  rules:
+    - The default demo must not require paid cloud credentials.
+    - Kumo is the default AWS-like local-first layer when cloud behavior is part of the proof.
+    - Real cloud providers are adapters behind ports, never direct domain dependencies.
+    - Local fake adapters and real adapters must obey the same contract to satisfy LSP.
+    - Parity tests must cover the port behavior that matters for the benchmark.
+
+real_cloud:
+  mode: adapter-only
+  allowed_when:
+    - real-cloud-behavior-is-the-proof
+    - local-first-emulation-cannot-represent-the-important-behavior
+    - cost-and-secret-requirements-are-documented
+  required_controls:
+    - config-switch
+    - ports-and-adapters-boundary
+    - no-secret-default-path
+    - cleanup-command-or-terraform-destroy-path
+
+handoff_contract:
+  required_before_implementation:
+    - project.yaml
+    - sdd/spec.md
+    - sdd/architecture-decision.md
+    - sdd/technical-decision.md
+    - sdd/benchmark-plan.md
+    - sdd/agent-handoff.md
+    - sdd/reuse-improvement-review.md
+  required_before_publication:
+    - docker-run-path
+    - benchmark-json
+    - README-number-claim-result
+    - REFERENCES.md
+    - reuse-improvement-review-complete
+    - validation-passing
+  conflict_resolution:
+    - Prefer the simpler option that still proves the claim.
+    - Prefer local-first execution unless real cloud is the benchmark subject.
+    - Prefer explicit ports/adapters when substituting local and real infrastructure.
+    - Reject architecture or tooling that hides the concept the repository exists to prove.
+    - Patch the reuse kit proactively when the project reveals a low-risk reusable improvement.

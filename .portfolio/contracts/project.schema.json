@@ -1,0 +1,198 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "PortfolioProjectManifest",
+  "type": "object",
+  "required": ["id", "name", "program", "status", "claim", "stack", "language_profile", "decision_brain", "architecture", "design_system", "benchmark", "release"],
+  "properties": {
+    "id": { "type": "integer", "minimum": 1, "maximum": 30 },
+    "name": { "type": "string", "pattern": "^[a-z0-9][a-z0-9-]*$" },
+    "program": {
+      "type": "object",
+      "required": ["id", "narrative_fit"],
+      "properties": {
+        "id": {
+          "type": "string",
+          "enum": [
+            "ai-evaluation-retrieval",
+            "applied-computer-vision",
+            "backend-reliability-platform",
+            "mlops-data-platform",
+            "delivery-observability-infra"
+          ]
+        },
+        "narrative_fit": { "type": "string", "minLength": 20 },
+        "shared_assets": { "type": "array", "items": { "type": "string" } }
+      }
+    },
+    "status": { "type": "string", "enum": ["scaffold", "implemented", "benchmarked", "published"] },
+    "claim": { "type": "string", "minLength": 10 },
+    "stack": { "type": "array", "items": { "type": "string" } },
+    "language_profile": {
+      "type": "object",
+      "required": ["primary", "reason"],
+      "properties": {
+        "primary": {
+          "type": "string",
+          "enum": [
+            "python",
+            "java",
+            "go",
+            "typescript",
+            "angular",
+            "nextjs",
+            "terraform",
+            "spring-kotlin-backend",
+            "fastapi-backend",
+            "go-backend",
+            "node-typescript-backend"
+          ]
+        },
+        "secondary": { "type": "array", "items": { "type": "string" } },
+        "reason": { "type": "string", "minLength": 10 }
+      }
+    },
+    "decision_brain": {
+      "type": "object",
+      "required": ["principles", "stack_profile", "api_style", "messaging", "cloud", "database", "library_policy", "record_path"],
+      "properties": {
+        "principles": {
+          "type": "object",
+          "required": ["coupling_rule", "solid", "simplicity_rule", "testability_rule"],
+          "properties": {
+            "coupling_rule": { "type": "string", "minLength": 10 },
+            "solid": { "type": "array", "items": { "type": "string", "enum": ["srp", "ocp", "lsp", "isp", "dip"] }, "minItems": 1 },
+            "simplicity_rule": { "type": "string", "minLength": 10 },
+            "testability_rule": { "type": "string", "minLength": 10 },
+            "rejected_overengineering": { "type": "array", "items": { "type": "string" } }
+          }
+        },        "stack_profile": {
+          "type": "string",
+          "enum": [
+            "spring-kotlin-backend",
+            "fastapi-backend",
+            "go-backend",
+            "angular",
+            "nextjs",
+            "python-ml",
+            "terraform",
+            "node-typescript-backend"
+          ]
+        },
+        "api_style": {
+          "type": "string",
+          "enum": ["rest-http", "graphql", "grpc", "websocket", "sse", "cli"]
+        },
+        "messaging": {
+          "type": "string",
+          "enum": ["none", "outbox-only", "rabbitmq", "kafka", "redis-streams", "nats"]
+        },
+        "cloud": {
+          "type": "object",
+          "required": ["mode", "local_provider", "real_provider_target", "adapter_rule", "config_switch"],
+          "properties": {
+            "mode": { "type": "string", "enum": ["none", "kumo-local-first", "adapter-fake", "real-cloud-required"] },
+            "local_provider": { "type": "string" },
+            "real_provider_target": { "type": "string" },
+            "emulated_services": { "type": "array", "items": { "type": "string" } },
+            "adapter_rule": { "type": "string", "minLength": 10 },
+            "config_switch": { "type": "string", "minLength": 5 },
+            "unsupported_behaviors": { "type": "array", "items": { "type": "string" } }
+          }
+        },
+        "database": { "type": "string" },
+        "runtime": { "type": "string" },
+        "library_policy": { "type": "string", "minLength": 10 },
+        "record_path": { "type": "string" },
+        "rejected_options": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["option", "reason"],
+            "properties": {
+              "option": { "type": "string" },
+              "reason": { "type": "string" }
+            }
+          }
+        }
+      }
+    },
+    "architecture": {
+      "type": "object",
+      "required": ["style", "reason", "dependency_rule", "boundaries", "rejected_alternatives"],
+      "properties": {
+        "style": {
+          "type": "string",
+          "enum": [
+            "mvc",
+            "layered",
+            "modular-monolith",
+            "clean-architecture",
+            "hexagonal",
+            "cqrs-event-sourcing",
+            "event-driven",
+            "mvvm",
+            "pipeline",
+            "serverless",
+            "microservices"
+          ]
+        },
+        "reason": { "type": "string", "minLength": 20 },
+        "problem_forces": {
+          "type": "object",
+          "properties": {
+            "domain_complexity": { "type": "string", "enum": ["low", "medium", "high"] },
+            "integration_pressure": { "type": "string", "enum": ["low", "medium", "high"] },
+            "ui_state_complexity": { "type": "string", "enum": ["none", "low", "medium", "high"] },
+            "data_or_ml_reproducibility": { "type": "string", "enum": ["low", "medium", "high"] },
+            "auditability": { "type": "string", "enum": ["low", "medium", "high"] },
+            "throughput_or_async": { "type": "string", "enum": ["low", "medium", "high"] },
+            "independent_deployability": { "type": "string", "enum": ["low", "medium", "high"] }
+          }
+        },
+        "dependency_rule": { "type": "string", "minLength": 10 },
+        "boundaries": { "type": "array", "items": { "type": "string" }, "minItems": 1 },
+        "rejected_alternatives": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["style", "reason"],
+            "properties": {
+              "style": { "type": "string" },
+              "reason": { "type": "string" }
+            }
+          }
+        }
+      }
+    },
+    "design_system": {
+      "type": "object",
+      "required": ["tokens", "readme_components"],
+      "properties": {
+        "tokens": { "type": "string" },
+        "readme_components": { "type": "array", "items": { "type": "string" } },
+        "diagram_required": { "type": "boolean" }
+      }
+    },
+    "reuse": { "type": "object" },
+    "benchmark": {
+      "type": "object",
+      "required": ["primary_metric", "unit", "command", "result_path"],
+      "properties": {
+        "primary_metric": { "type": "string" },
+        "unit": { "type": "string" },
+        "command": { "type": "string" },
+        "result_path": { "type": "string" }
+      }
+    },
+    "release": {
+      "type": "object",
+      "required": ["docker", "no_secret_default_path", "readme_has_number", "references_documented"],
+      "properties": {
+        "docker": { "type": "string" },
+        "no_secret_default_path": { "type": "boolean" },
+        "readme_has_number": { "type": "boolean" },
+        "references_documented": { "type": "boolean" }
+      }
+    }
+  }
+}

@@ -1,0 +1,37 @@
+profile: angular
+language: typescript
+applies_to: [frontend, enterprise-ui, dashboard, admin, design-system-demo]
+proves:
+  - component architecture for enterprise frontends
+  - typed forms and validation
+  - service/facade boundaries
+  - route guards and modular feature areas
+package_layout:
+  default: src/app
+  features: src/app/features/<feature>
+  shared: src/app/shared
+  core: src/app/core
+  tests: src/**/*.spec.ts
+required_tooling:
+  - angular-cli
+  - typescript_strict
+  - eslint
+  - prettier
+  - vitest_or_jest
+  - playwright_when_ui_is_part_of_claim
+architecture_mapping:
+  mvvm: [models, view-models_or_facades, components, services]
+  modular-frontend: [core, shared, features, shell]
+  layered: [components, services, repositories]
+benchmark_rules:
+  - include Lighthouse or Playwright timing when UI performance is part of the claim
+  - include bundle size when the project proves frontend engineering
+  - include form or workflow completion time for admin tools
+readme_rules:
+  - show feature module tree
+  - include screenshot only when it proves a workflow
+  - include commands for test, build, and preview
+linkedin_signal:
+  - "Angular enterprise frontend"
+  - "typed forms"
+  - "modular UI architecture"

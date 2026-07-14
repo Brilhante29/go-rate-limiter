@@ -1,0 +1,104 @@
+version: 1
+principle: "Cloud integrations must be local-first by default and pluggable to real cloud through explicit ports/adapters."
+default_local_provider:
+  name: kumo
+  source: "https://github.com/sivchari/kumo"
+  description: "Lightweight AWS service emulator written in Go."
+  docker: "docker run -p 4566:4566 ghcr.io/sivchari/kumo:latest"
+  persistent_docker: "docker run -p 4566:4566 -e KUMO_DATA_DIR=/data -v kumo-data:/data ghcr.io/sivchari/kumo:latest"
+  endpoint: "http://localhost:4566"
+  auth: "static test/test credentials for local and CI"
+  persistence: "optional with KUMO_DATA_DIR"
+required_decision_fields:
+  - local_provider
+  - real_provider_target
+  - emulated_services
+  - ports
+  - adapters
+  - config_switch
+  - parity_tests
+  - unsupported_behaviors
+modes:
+  local-first-required:
+    rule: "Every cloud-backed project must run locally with Kumo unless the project proves a non-AWS provider only."
+    required_artifacts:
+      - docker-compose service or docker command for kumo
+      - local endpoint configuration
+      - static local credentials
+      - adapter interface for each cloud capability
+      - fake/emulator parity test
+      - README section showing local-first path
+  real-cloud-pluggable:
+    rule: "Real cloud providers are adapters behind the same ports used by Kumo."
+    required_artifacts:
+      - provider config enum or environment variable
+      - real provider adapter separated from domain/application
+      - no real cloud credentials in default path
+      - IaC or deployment docs only when the project requires real cloud proof
+providers:
+  aws:
+    local_first: kumo
+    real_target: aws
+    endpoint_override_required: true
+    default_region: us-east-1
+    local_credentials:
+      access_key_id: test
+      secret_access_key: test
+    supported_local_services_preferred:
+      storage: [s3]
+      queue: [sqs]
+      pubsub: [sns]
+      events: [eventbridge]
+      database: [dynamodb, rds]
+      functions: [lambda]
+      api: [api-gateway, api-gateway-v2]
+      secrets: [secrets-manager, ssm]
+      stream: [kinesis, msk]
+      monitoring: [cloudwatch, cloudwatch-logs, x-ray]
+      ml: [sagemaker, rekognition, comprehend]
+    adapter_rule: "Use AWS SDK-compatible clients with endpoint override for Kumo and default endpoint for AWS."
+  non_aws:
+    local_first: adapter_fake_or_containerized_equivalent
+    rule: "If Kumo does not model the real provider, still preserve the same port/adapter shape and document why Kumo is not used."
+cloud_capabilities:
+  object_storage:
+    local: kumo_s3
+    real: aws_s3
+    port_names: [ObjectStoragePort, BlobStoragePort]
+    benchmark_fit: [put_latency_ms, get_latency_ms, bytes_per_second]
+  queue:
+    local: kumo_sqs
+    real: aws_sqs
+    port_names: [QueuePort, JobQueuePort]
+    benchmark_fit: [messages_per_second, receive_latency_ms, retry_success_rate]
+  pubsub:
+    local: kumo_sns
+    real: aws_sns
+    port_names: [PubSubPort, NotificationPort]
+    benchmark_fit: [fanout_count, publish_latency_ms]
+  event_bus:
+    local: kumo_eventbridge
+    real: aws_eventbridge
+    port_names: [EventBusPort]
+    benchmark_fit: [events_per_second, rule_match_latency_ms]
+  nosql:
+    local: kumo_dynamodb
+    real: aws_dynamodb
+    port_names: [NoSqlTablePort, KeyValueStorePort]
+    benchmark_fit: [read_latency_ms, write_latency_ms]
+  secrets:
+    local: kumo_secrets_manager
+    real: aws_secrets_manager
+    port_names: [SecretStorePort]
+    benchmark_fit: [secret_read_latency_ms]
+  functions:
+    local: kumo_lambda
+    real: aws_lambda
+    port_names: [FunctionInvokerPort]
+    benchmark_fit: [invoke_latency_ms]
+rejection_rules:
+  - reject direct AWS SDK calls inside domain or application use cases
+  - reject real cloud as the default demo path
+  - reject code that cannot switch endpoint/provider via configuration
+  - reject cloud decisions without parity tests or documented unsupported behaviors
+  - reject infrastructure-only cloud proof without local runnable path

@@ -1,0 +1,65 @@
+profile: spring-kotlin-backend
+language: kotlin
+runtime: jvm
+applies_to: [backend, enterprise-backend, payments, orders, reliability, multi-tenant, outbox, cqrs, saga]
+public_signal: "Kotlin + Spring backend with architecture boundaries, tests, observability, and benchmark evidence"
+package_layout:
+  default: src/main/kotlin
+  tests: src/test/kotlin
+  resources: src/main/resources
+  root_package_rule: "domain names first, framework details outside core domain"
+recommended_architectures:
+  - hexagonal
+  - clean-architecture
+  - modular-monolith
+  - cqrs-event-sourcing
+runtime_decisions:
+  default_web_stack: spring-webmvc
+  use_webmvc_when:
+    - transactional REST API
+    - blocking database driver or ORM
+    - architecture and consistency are the main proof
+  use_webflux_when:
+    - end-to-end non-blocking I/O exists
+    - slow external calls dominate request time
+    - benchmark measures scalability with small fixed thread pools
+  reject_webflux_when:
+    - database and clients are blocking
+    - reactive code would obscure the domain proof
+persistence_decisions:
+  default: spring-data-jdbc
+  use_jpa_when:
+    - complex mapping or enterprise ORM signal is part of the proof
+    - lazy/eager relationship tradeoffs are documented
+  use_r2dbc_when:
+    - WebFlux is selected and persistence is non-blocking end to end
+  migrations: flyway
+required_tooling:
+  - gradle-kotlin-dsl
+  - spring-boot
+  - kotlin-spring-plugin
+  - spring-validation
+  - flyway
+  - postgresql
+  - testcontainers
+  - junit5
+  - kotest_or_assertj
+  - mockk
+  - spring-boot-actuator
+  - micrometer
+quality_gates:
+  - unit tests for use cases without Spring context
+  - integration tests with Testcontainers for database or broker
+  - architecture decision in sdd/technical-decision.md
+  - p95 or p99 benchmark for HTTP projects
+benchmark_rules:
+  - use k6 for HTTP load tests
+  - report p95 and p99 latency
+  - include coverage when architecture is part of the claim
+  - include failure scenario for outbox, saga, or broker projects
+readme_rules:
+  - show package boundary tree
+  - state MVC vs WebFlux decision
+  - state persistence decision
+  - include Testcontainers command
+  - include benchmark result table

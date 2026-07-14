@@ -1,0 +1,24 @@
+language: java
+applies_to: [spring, backend, kafka, payments, event-sourcing, reliability]
+package_layout:
+  default: src/main/java
+  tests: src/test/java
+  resources: src/main/resources
+required_tooling:
+  - junit
+  - testcontainers
+  - jacoco
+  - docker
+architecture_mapping:
+  hexagonal: [domain, application/port/in, application/port/out, adapter/in, adapter/out, config]
+  clean-architecture: [core, domain, application/usecase, infra]
+  modular-monolith: [modules/<context>/domain, modules/<context>/application, modules/<context>/infra, shared]
+  cqrs-event-sourcing: [domain/events, application/commands, application/queries, projections, eventstore]
+benchmark_rules:
+  - include p95 or p99 for HTTP APIs
+  - include coverage when architecture is part of the claim
+  - use Testcontainers for persistence or broker integration tests
+readme_rules:
+  - show package boundary tree
+  - state dependency direction
+  - include k6 or benchmark command for API projects

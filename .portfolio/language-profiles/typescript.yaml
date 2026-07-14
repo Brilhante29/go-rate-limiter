@@ -1,0 +1,22 @@
+language: typescript
+applies_to: [frontend, nestjs, node, tooling, k6-javascript]
+package_layout:
+  default: src
+  tests: test_or_src_colocated
+required_tooling:
+  - eslint
+  - prettier
+  - vitest_or_jest
+  - docker_when_service
+architecture_mapping:
+  clean-architecture: [core, domain, application, infra]
+  modular-monolith: [modules/<context>, shared]
+  mvvm: [models, view-models, views, services]
+  layered: [controllers, services, repositories]
+benchmark_rules:
+  - include endpoint or UI interaction latency when relevant
+  - keep generated clients/contracts explicit
+readme_rules:
+  - include scripts table
+  - include architecture boundary tree
+  - include screenshots only when they prove behavior

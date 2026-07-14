@@ -1,0 +1,147 @@
+version: 1
+principle: "Choose architecture from problem forces, not from personal taste or stack fashion."
+required_decision_fields:
+  - problem_shape
+  - chosen_style
+  - reason
+  - rejected_alternatives
+  - dependency_rule
+  - folder_layout
+  - testing_strategy
+styles:
+  mvc:
+    use_when:
+      - simple CRUD or admin workflow
+      - thin business rules
+      - fast delivery matters more than strict domain isolation
+    avoid_when:
+      - complex domain invariants
+      - many external adapters
+      - long-lived product with multiple bounded contexts
+    default_layout: [controllers, models, views_or_routes, services, tests]
+    benchmark_fit: [endpoint_latency, request_throughput]
+  layered:
+    use_when:
+      - standard API with clear presentation, service, persistence layers
+      - business rules are moderate and mostly procedural
+    avoid_when:
+      - domain should be independent from framework and database
+      - adapters change frequently
+    default_layout: [presentation, application, domain, infrastructure, tests]
+    benchmark_fit: [p95_latency_ms, coverage_percent]
+  modular-monolith:
+    use_when:
+      - one deployable app with multiple business areas
+      - boundaries matter but microservices would add ceremony
+      - portfolio project needs visible architecture without distributed complexity
+    avoid_when:
+      - truly independent teams, scaling, or deployment cycles are required now
+    default_layout:
+      - modules/<context>/domain
+      - modules/<context>/application
+      - modules/<context>/infra
+      - shared/kernel
+      - tests
+    benchmark_fit: [module_test_coverage, p99_latency_ms]
+  clean-architecture:
+    use_when:
+      - domain rules are the main evidence
+      - use cases must be testable without framework, database, or HTTP
+      - recruiter should see dependency inversion clearly
+    avoid_when:
+      - trivial CRUD where ceremony hides the result
+    default_layout:
+      - core
+      - domain/<bounded-context>
+      - application/use-cases
+      - infra/http
+      - infra/database
+      - test
+    dependency_rule: "Outer layers may depend inward; domain and use cases do not depend on infra."
+    benchmark_fit: [coverage_percent, use_case_latency_ms]
+  hexagonal:
+    use_when:
+      - many external systems, databases, queues, APIs, or payment providers
+      - adapters need to be swapped or faked in tests
+      - ports and adapters make the problem easier to explain
+    avoid_when:
+      - the app has one stable database and almost no integrations
+    default_layout:
+      - domain
+      - application/ports/in
+      - application/ports/out
+      - adapters/in
+      - adapters/out
+      - config
+      - tests
+    dependency_rule: "Adapters depend on ports; domain/application do not depend on adapters."
+    benchmark_fit: [adapter_latency_ms, p99_latency_ms, integration_success_rate]
+  cqrs-event-sourcing:
+    use_when:
+      - audit history is part of the value
+      - read and write models have different shapes
+      - replay, temporal queries, or event throughput is the benchmark
+    avoid_when:
+      - current-state CRUD is enough
+      - operational complexity would dominate the portfolio claim
+    default_layout: [domain/events, application/commands, application/queries, projections, event-store, tests]
+    benchmark_fit: [events_per_second, projection_lag_ms]
+  event-driven:
+    use_when:
+      - async workflows, streaming, queues, or eventual consistency are central
+      - benchmark is messages per second, lag, or recovery after failure
+    avoid_when:
+      - synchronous request/response is the whole problem
+    default_layout: [producers, consumers, contracts, application, infra/broker, tests]
+    benchmark_fit: [messages_per_second, consumer_lag_ms]
+  mvvm:
+    use_when:
+      - UI state, forms, validation, and screen behavior are the hard part
+      - desktop, mobile, or rich frontend needs testable view state
+    avoid_when:
+      - backend-only service
+    default_layout: [models, view-models, views, services, tests]
+    benchmark_fit: [interaction_latency_ms, render_time_ms]
+  pipeline:
+    use_when:
+      - data, ML, computer vision, ETL, or batch processing is central
+      - each stage has inputs, outputs, metrics, and reproducibility needs
+    avoid_when:
+      - user-facing transactional behavior dominates
+    default_layout: [stages/ingest, stages/prepare, stages/train_or_process, stages/evaluate, stages/serve, artifacts, tests]
+    benchmark_fit: [throughput_items_per_second, accuracy_metric, cost_per_run]
+  serverless:
+    use_when:
+      - small event-triggered workloads
+      - cost, cold start, and managed scaling are the evidence
+    avoid_when:
+      - long-running compute or local-only Docker demo is the main path
+    default_layout: [functions, handlers, domain, infra, tests]
+    benchmark_fit: [cold_start_ms, cost_per_1000_requests]
+  microservices:
+    use_when:
+      - independent deployability is part of the claim
+      - service boundaries and contracts are demonstrable
+      - there is a real reason to pay distributed-system cost
+    avoid_when:
+      - portfolio scope is better shown as a modular monolith
+    default_layout: [services/<service>/src, contracts, gateway, deploy, tests]
+    benchmark_fit: [service_p95_latency_ms, contract_test_pass_rate]
+selection_forces:
+  domain_complexity:
+    low: [mvc, layered]
+    medium: [layered, modular-monolith, hexagonal]
+    high: [clean-architecture, hexagonal, cqrs-event-sourcing]
+  integration_pressure:
+    low: [mvc, layered, clean-architecture]
+    high: [hexagonal, event-driven]
+  ui_state_complexity:
+    high: [mvvm]
+  data_or_ml_reproducibility:
+    high: [pipeline]
+  auditability:
+    high: [cqrs-event-sourcing]
+  throughput_or_async:
+    high: [event-driven]
+  independent_deployability:
+    high: [microservices]

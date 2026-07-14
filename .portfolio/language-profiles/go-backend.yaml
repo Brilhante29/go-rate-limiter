@@ -1,0 +1,56 @@
+profile: go-backend
+language: go
+runtime: native
+applies_to: [backend, gateway, rate-limiter, emulator, protocol-benchmark, observability-agent, load-tool]
+public_signal: "Go backend for low-overhead networking, concurrency, protocol handling, and measurable performance"
+package_layout:
+  command: cmd/<app>
+  internal: internal/<domain>
+  adapters: internal/adapters
+  tests: colocated *_test.go
+  reusable_public_packages: pkg_when_reusable
+recommended_architectures:
+  - layered
+  - hexagonal
+  - event-driven
+  - modular-monolith
+runtime_decisions:
+  default_http: net/http
+  default_router: chi
+  use_chi_when:
+    - maintainable REST API with standard middleware compatibility
+    - modular route groups and context propagation matter
+  use_gin_when:
+    - developer ergonomics and common REST middleware ecosystem matter
+    - benchmark or project constraint justifies the dependency
+  use_fiber_when:
+    - fasthttp compatibility is acceptable
+    - raw throughput is the explicit benchmark claim
+    - net/http middleware compatibility is not required
+persistence_decisions:
+  postgresql_driver: pgx
+  typed_sql: sqlc_when_query_contracts_should_be_visible
+  migrations: goose_or_atlas
+  redis_client: redis-go-redis
+required_tooling:
+  - go-test
+  - gofmt
+  - go-vet
+  - golangci-lint_when_available
+  - pprof
+  - k6_or_ghz
+  - testcontainers-go_when_external_services_exist
+quality_gates:
+  - go test ./... passes
+  - benchmarks or load tests report p95/p99 when performance is claimed
+  - pprof or allocation benchmark included for performance-focused repos
+  - context cancellation respected in HTTP and worker paths
+benchmark_rules:
+  - report throughput_rps and p95_latency_ms for services
+  - report allocs_per_operation for hot code paths
+  - use ghz for gRPC and k6 for HTTP
+readme_rules:
+  - show cmd entrypoint
+  - show internal package boundary
+  - show router decision
+  - include benchmark command and result
