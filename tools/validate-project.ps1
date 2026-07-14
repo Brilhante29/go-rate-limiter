@@ -44,9 +44,9 @@ if (Test-Path -LiteralPath $reuseReviewPath -PathType Leaf) {
     Add-Failure "Reuse improvement review still contains the blank template finding row"
   }
   $requiredFinalGatePatterns = @(
-    "(?m)^- \[x\] Reusable improvements were patched or recorded\.$",
-    "(?m)^- \[x\] Project-specific implementation was not moved into the kit\.$",
-    "(?m)^- \[x\] Validation reflects .+\.$"
+    "(?m)^- \[x\] Reusable improvements were patched or recorded\.\r?$",
+    "(?m)^- \[x\] Project-specific implementation was not moved into the kit\.\r?$",
+    "(?m)^- \[x\] Validation reflects .+\.\r?$"
   )
   foreach ($pattern in $requiredFinalGatePatterns) {
     if ($reuseReview -notmatch $pattern) {
