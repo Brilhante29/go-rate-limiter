@@ -20,6 +20,19 @@ function Require-File {
   }
 }
 
+function Invoke-Checked {
+  param(
+    [string]$Label,
+    [scriptblock]$Command
+  )
+  & $Command
+  $exitCode = $LASTEXITCODE
+  if ($exitCode -ne 0) {
+    Add-Failure "$Label failed with exit code $exitCode"
+  }
+  $global:LASTEXITCODE = 0
+}
+
 $requiredFiles = @(
   "README.md",
   "project.yaml",
@@ -34,7 +47,7 @@ $requiredFiles = @(
 )
 foreach ($file in $requiredFiles) { Require-File $file }
 
-$reuseReviewPath = Join-Path $root "sdd\reuse-improvement-review.md"
+$reuseReviewPath = Join-Path $root "sdd/reuse-improvement-review.md"
 if (Test-Path -LiteralPath $reuseReviewPath -PathType Leaf) {
   $reuseReview = Get-Content -Raw -LiteralPath $reuseReviewPath
   if ($reuseReview -match "<id>|<project-name>") {
@@ -56,7 +69,7 @@ if (Test-Path -LiteralPath $reuseReviewPath -PathType Leaf) {
 }
 
 $benchmarkFiles = @()
-$benchmarkDir = Join-Path $root "benchmarks\results"
+$benchmarkDir = Join-Path $root "benchmarks/results"
 if (Test-Path -LiteralPath $benchmarkDir -PathType Container) {
   $benchmarkFiles = @(Get-ChildItem -LiteralPath $benchmarkDir -Filter *.json -File)
 }
@@ -64,24 +77,37 @@ if ($benchmarkFiles.Count -eq 0) {
   Add-Failure "Missing benchmark JSON under benchmarks/results"
 }
 
-foreach ($file in $benchmarkFiles) {
-  python -m json.tool $file.FullName | Out-Null
-}
-
-if (Test-Path -LiteralPath (Join-Path $root "src") -PathType Container) {
-  $env:PYTHONPATH = "src"
-  python -m compileall -q (Join-Path $root "src")
-  if (Test-Path -LiteralPath (Join-Path $root "tests") -PathType Container) {
-    python -m compileall -q (Join-Path $root "tests")
-    python -m unittest discover -s (Join-Path $root "tests") -v
+Push-Location -LiteralPath $root
+try {
+  foreach ($file in $benchmarkFiles) {
+    Invoke-Checked "benchmark JSON validation: $($file.Name)" { python -m json.tool $file.FullName | Out-Null }
   }
+
+  if (Test-Path -LiteralPath (Join-Path $root "src") -PathType Container) {
+    $previousPythonPath = $env:PYTHONPATH
+    $srcPath = Join-Path $root "src"
+    if ($previousPythonPath) {
+      $env:PYTHONPATH = $srcPath + [System.IO.Path]::PathSeparator + $previousPythonPath
+    } else {
+      $env:PYTHONPATH = $srcPath
+    }
+    Invoke-Checked "python compile src" { python -m compileall -q (Join-Path $root "src") }
+    if (Test-Path -LiteralPath (Join-Path $root "tests") -PathType Container) {
+      Invoke-Checked "python compile tests" { python -m compileall -q (Join-Path $root "tests") }
+      Invoke-Checked "python unittest" { python -m unittest discover -s (Join-Path $root "tests") -v }
+    }
+    $env:PYTHONPATH = $previousPythonPath
+  }
+} finally {
+  Pop-Location
 }
 
 $legacy = ("ro" + "che" + "do")
 $patterns = @($legacy, ($legacy.Substring(0,1).ToUpper() + $legacy.Substring(1)))
 $searchFiles = Get-ChildItem -Path $root -Recurse -File | Where-Object {
-  $_.FullName -notmatch "\\.git\\" -and
-  $_.FullName -notmatch "\\data\\runtime\\" -and
+  $normalized = $_.FullName -replace "\\", "/"
+  $normalized -notmatch "/.git/" -and
+  $normalized -notmatch "/data/runtime/" -and
   $_.Extension -in @(".md", ".yaml", ".yml", ".json", ".ps1", ".py", ".js", ".ts", ".tsx", ".go", ".kt", ".java")
 }
 $forbidden = Select-String -Path $searchFiles.FullName -Pattern $patterns -SimpleMatch -ErrorAction SilentlyContinue
@@ -91,7 +117,7 @@ if ($forbidden) {
 
 if (-not $SkipDocker -and (Test-Path -LiteralPath (Join-Path $root "Dockerfile") -PathType Leaf)) {
   $imageName = (Split-Path -Leaf $root).ToLowerInvariant()
-  docker build -t $imageName $root | Out-Null
+  Invoke-Checked "docker build" { docker build -t $imageName $root | Out-Null }
 }
 
 if ($failures.Count -gt 0) {

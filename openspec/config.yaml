@@ -1,0 +1,34 @@
+schema: portfolio-system
+references:
+  - portfolio-reuse-kit
+context: |
+  Project: go-rate-limiter (#unknown)
+  Source of truth:
+    - Use `.portfolio/` as the local snapshot of portfolio-reuse-kit.
+    - Use `project.yaml` for the public project contract.
+    - Use `sdd/` for lightweight artifacts that must exist even without OpenSpec installed.
+  Core rules:
+    - Prove one measurable claim.
+    - Select one component pack from `.portfolio/component-packs/manifest.yaml`.
+    - Record architecture, stack, API, messaging, cloud, database/runtime, and library choices with rejected alternatives.
+    - Keep domain/use-case code independent from framework, database, broker, cloud SDK, transport, and UI.
+    - Prefer local-first execution; use Kumo for AWS-like behavior and adapters for real cloud.
+    - Resolve reuse improvements as patch-now, backlog, or reject.
+rules:
+  reference-reuse:
+    - Prioritize local skills and `.portfolio/`; use external repositories only as attributed references unless a decision record explicitly accepts deeper reuse.
+  intent:
+    - Keep the claim measurable and README-ready.
+  portfolio-impact:
+    - Explain how this repo strengthens a macro project, not just itself.
+  architecture-record:
+    - Include SOLID, LSP, KISS, YAGNI, dependency inversion, and testability evidence.
+  component-pack:
+    - Select from `.portfolio/component-packs/manifest.yaml`.
+    - Do not install external tools without explicit approval.
+  reuse-delta:
+    - Record whether the kit improved because of this project.
+  benchmark-proof:
+    - Include metric, unit, command, fixture, JSON path, and README result.
+  verification:
+    - Verify Docker, tests, benchmark JSON, README, references, reuse review, and validation.

@@ -1,0 +1,238 @@
+version: 1
+purpose: >
+  Declarative component packs for the portfolio. This borrows the useful
+  idea from component catalogs: agents, skills, commands, hooks, settings,
+  templates, and validation gates should be selected as a coherent pack for
+  a problem, not copied by habit.
+
+runtime_targets:
+  primary:
+    - codex
+    - claude
+  planned:
+    - cursor
+    - github-copilot
+    - windsurf
+  rule: >
+    Keep the canonical component definitions in this repository. Generated
+    tool-specific files may differ by destination, but the decision source
+    and validation gates must remain the same.
+
+reuse_priority_order:
+  - level: 1
+    source: user-owned-skills
+    rule: Use `.codex/skills/` and `.claude/skills/` as the primary operating layer.
+  - level: 2
+    source: portfolio-reuse-kit
+    rule: Use decision brain, component packs, SDD templates, language profiles, harness, and design system before external references.
+  - level: 3
+    source: external-reference-repositories
+    rule: Reuse organization patterns, workflow shape, schema ideas, benchmark style, testing strategy, and docs structure when they improve the project.
+  - level: 4
+    source: external-code-or-components
+    rule: Use only with license compatibility, attribution, problem fit, and explicit decision record; never replace the local kit silently.
+
+component_types:
+  skill:
+    description: Agent-operating instruction loaded by Codex or Claude Code.
+    local_paths:
+      codex: .codex/skills
+      claude: .claude/skills
+  command:
+    description: Repeatable slash-command or prompt workflow.
+    policy: Record command recommendations here before generating tool-specific files.
+  hook:
+    description: Automation around validation, formatting, release, or security.
+    policy: Never add hooks that mutate git, install dependencies, or call external services without explicit user approval.
+  setting:
+    description: Tool behavior preset.
+    policy: Prefer project-local settings; never commit machine-specific secrets or absolute paths.
+  template:
+    description: Files copied into a project scaffold.
+    local_paths:
+      project: templates
+      sdd: sdd/templates
+      openspec_schema: openspec/schemas
+  mcp:
+    description: External tool integration.
+    policy: Use placeholders only; do not hardcode tokens, keys, account IDs, or personal paths.
+
+base_pack:
+  id: default-portfolio-project
+  applies_to: all-projects
+  skills:
+    - portfolio-project
+    - agentic-spec-governance
+    - spec-driven-project
+    - agent-orchestration
+    - reuse-improvement-review
+    - architecture-selector
+    - engineering-principles
+    - stack-decision
+    - api-style-decision
+    - cloud-local-first
+    - messaging-decision
+    - language-standards
+    - design-system
+    - benchmark-harness
+  decision_sources:
+    - catalog/programs.yaml
+    - catalog/projects.yaml
+    - catalog/proficiency.yaml
+    - decision-brain/agentic-spec-governance.yaml
+    - decision-brain/agent-graph.yaml
+    - decision-brain/reuse-improvement-loop.yaml
+    - architecture/decision-matrix.yaml
+    - decision-brain/engineering-principles.yaml
+    - decision-brain/stack-matrix.yaml
+    - decision-brain/api-style-matrix.yaml
+    - decision-brain/messaging-matrix.yaml
+    - decision-brain/cloud-matrix.yaml
+    - decision-brain/library-selection.yaml
+  templates:
+    - templates/project.yaml
+    - templates/README-project.md
+    - templates/AGENTS.md
+    - templates/openspec-config.yaml
+    - sdd/templates/spec.md
+    - sdd/templates/benchmark-plan.md
+    - sdd/templates/architecture-decision.md
+    - sdd/templates/technical-decision.md
+    - sdd/templates/agent-handoff.md
+    - sdd/templates/reuse-improvement-review.md
+    - sdd/templates/release-checklist.md
+  gates:
+    - project_yaml_complete
+    - openspec_config_present
+    - sdd_complete
+    - reuse_review_complete
+    - docker_default_path
+    - benchmark_json_present
+    - readme_number_claim_result
+    - validation_passes
+
+packs:
+  - id: ai-evaluation-retrieval
+    name: AI Evaluation and Retrieval Systems
+    extends: default-portfolio-project
+    program_id: ai-evaluation-retrieval
+    problem: Evaluate LLM, RAG, embeddings, prompts, agents, and inference cost with reproducible evidence.
+    extra_skills:
+      - fastapi-backend
+      - node-typescript-backend
+    benchmark_focus:
+      - exact_match
+      - f1
+      - recall_at_k
+      - latency_ms
+      - cost_per_query_usd
+      - task_success_rate
+    preferred_artifacts:
+      - evaluation fixtures
+      - answer/reference pairs
+      - retrieval corpus
+      - deterministic local runner
+      - cost table
+    rejection_rules:
+      - Reject demos that require paid model credentials for the default path.
+      - Reject quality claims without benchmark JSON.
+      - Reject hidden prompts without prompt/version attribution.
+
+  - id: applied-computer-vision
+    name: Applied Computer Vision and Medical AI
+    extends: default-portfolio-project
+    program_id: applied-computer-vision
+    problem: Train, evaluate, and serve visual models with reproducible metrics and domain-specific proof.
+    extra_skills:
+      - fastapi-backend
+    benchmark_focus:
+      - map
+      - auc
+      - sensitivity
+      - accuracy
+      - confusion_matrix
+      - latency_per_image_ms
+      - throughput_rps
+    preferred_artifacts:
+      - dataset card
+      - preprocessing manifest
+      - model card
+      - confusion matrix
+      - inference latency script
+    rejection_rules:
+      - Reject health or medical claims without clear demo limitation.
+      - Reject training notebooks without Docker path.
+      - Reject serving APIs without latency benchmark.
+
+  - id: backend-reliability-platform
+    name: Backend Reliability and Architecture Platform
+    extends: default-portfolio-project
+    program_id: backend-reliability-platform
+    problem: Prove backend architecture, reliability, latency, consistency, and failure handling.
+    extra_skills:
+      - spring-kotlin-backend
+      - go-backend
+      - node-typescript-backend
+    benchmark_focus:
+      - p95_latency_ms
+      - p99_latency_ms
+      - throughput_rps
+      - consistency_rate
+      - event_throughput
+      - zero_loss_under_failure
+    preferred_artifacts:
+      - ADRs
+      - API contract
+      - load test
+      - failure scenario
+      - consistency proof
+    rejection_rules:
+      - Reject framework-first architecture with domain depending on infra.
+      - Reject RabbitMQ, Kafka, or microservices unless the benchmark needs async scale or fault isolation.
+      - Reject "clean architecture" claims without dependency direction tests.
+
+  - id: mlops-data-platform
+    name: MLOps and Data Platform
+    extends: default-portfolio-project
+    program_id: mlops-data-platform
+    problem: Move models and data through training, validation, feature serving, drift detection, and streaming.
+    extra_skills:
+      - fastapi-backend
+    benchmark_focus:
+      - time_to_production
+      - drift_alarm_delta
+      - feature_read_latency_ms
+      - rejected_rows_ratio
+      - messages_per_second
+    preferred_artifacts:
+      - data contract
+      - feature schema
+      - model registry record
+      - drift baseline
+      - pipeline DAG
+    rejection_rules:
+      - Reject ML demos with no data validation.
+      - Reject pipelines that cannot run locally.
+      - Reject streaming claims without message-rate benchmark.
+
+  - id: delivery-observability-infra
+    name: Delivery, Observability, and Infrastructure
+    extends: default-portfolio-project
+    program_id: delivery-observability-infra
+    problem: Standardize CI, observability, infrastructure, and load evidence across the portfolio.
+    extra_skills:
+      - go-backend
+    benchmark_focus:
+      - build_time_seconds
+      - mttr_simulated_minutes
+      - provision_time_seconds
+      - p95_load_curve
+    preferred_artifacts:
+      - GitHub Actions workflow
+      - dashboard JSON or screenshot recipe
+      - Terraform plan summary
+      - k6 profile
+    rejection_rules:
+      - Reject cloud-only demos without local-first path.
+      - Reject dashboards without a simulated incident.
+      - Reject load-test repos without reusable scenarios.

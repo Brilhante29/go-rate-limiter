@@ -1,0 +1,141 @@
+version: 1
+purpose: >
+  Make the reuse kit behave like a portfolio planning store plus component
+  catalog. A project must be planned through explicit artifacts and must use a
+  component pack selected by the problem, not by the current agent's habits.
+
+inspirations:
+  reuse_priority:
+    rule: >
+      User-owned skills and the local portfolio-reuse-kit are the primary
+      operating system. External repositories are reference material and
+      accelerators when they improve a concrete portfolio outcome.
+    order:
+      - user-owned skills in `.codex/skills/` and `.claude/skills/`
+      - local `.portfolio/` snapshot and upstream `portfolio-reuse-kit`
+      - approved public repositories for organization, schema, workflow, tests, benchmarks, and docs
+      - external libraries/components with license, attribution, and decision record
+    external_reference_policy:
+      use_for:
+        - repository organization
+        - workflow and agent orchestration ideas
+        - SDD/OpenSpec-style artifact shape
+        - benchmark harness structure
+        - test strategy
+        - documentation and DX patterns
+      do_not_use_for:
+        - replacing local skills silently
+        - copying project implementation without problem-specific adaptation
+        - importing license risk into portfolio projects
+  ai_tmpl:
+    adopted:
+      - component taxonomy: skills, commands, MCPs, hooks, settings, templates
+      - workflow packs as versioned YAML
+      - component health and validation mindset
+      - no-secret component rules
+    adapted_for_this_kit:
+      - packs are selected by portfolio program and benchmark proof
+      - Codex and Claude skills are generated from the same canonical definitions
+      - external installs are recommendations, not automatic actions
+    rejected:
+      - blindly installing large public component bundles
+      - machine-specific settings committed into projects
+      - components that do not improve a measurable portfolio claim
+  openspec:
+    adopted:
+      - planning store as a standalone repo
+      - specs and changes as versioned artifacts
+      - custom schema with artifact dependency graph
+      - fluid iteration: update artifacts as implementation reveals facts
+      - references/worksets mental model for multi-repo work
+    adapted_for_this_kit:
+      - `portfolio-reuse-kit` is the central planning store
+      - generated projects get an `openspec/config.yaml` pointer and `.portfolio/` snapshot
+      - `sdd/` remains the lightweight always-present fallback
+    rejected:
+      - hard dependency on a globally installed CLI for validation
+      - planning artifacts with no benchmark or publication gate
+
+store:
+  id: portfolio-reuse-kit
+  identity_file: .openspec-store/store.yaml
+  config: openspec/config.yaml
+  schema: openspec/schemas/portfolio-system/schema.yaml
+  role: central-planning-store
+  share_rule: Commit and push store changes like normal code; do not auto-clone, auto-pull, or auto-push from project scripts.
+
+project_integration:
+  generated_config: openspec/config.yaml
+  generated_config_template: templates/openspec-config.yaml
+  local_snapshot: .portfolio
+  fallback_artifacts:
+    - sdd/spec.md
+    - sdd/architecture-decision.md
+    - sdd/technical-decision.md
+    - sdd/benchmark-plan.md
+    - sdd/agent-handoff.md
+    - sdd/reuse-improvement-review.md
+    - sdd/release-checklist.md
+  rule: >
+    If OpenSpec is installed, use the `portfolio-system` schema. If it is not
+    installed, keep the same artifact graph manually in `sdd/` and `project.yaml`.
+
+artifact_graph:
+  - id: intent
+    generates: intent.md
+    requires: []
+    question: What measurable problem is this repository solving?
+  - id: portfolio-impact
+    generates: portfolio-impact.md
+    requires: [intent]
+    question: Which macro program does it strengthen and what public proof does it add?
+  - id: architecture-record
+    generates: architecture-record.md
+    requires: [intent]
+    question: Which architecture fits the problem forces and what alternatives were rejected?
+  - id: component-pack
+    generates: component-pack.md
+    requires: [portfolio-impact, architecture-record]
+    question: Which skills, templates, profiles, and gates apply?
+  - id: reuse-delta
+    generates: reuse-delta.md
+    requires: [component-pack]
+    question: What should be patched into the kit, backlogged, or rejected?
+  - id: benchmark-proof
+    generates: benchmark-proof.md
+    requires: [architecture-record]
+    question: Which benchmark will make the claim credible?
+  - id: tasks
+    generates: tasks.md
+    requires: [reuse-delta, benchmark-proof]
+    question: What implementation steps are now allowed?
+  - id: verification
+    generates: verification.md
+    requires: [tasks]
+    question: Did implementation satisfy specs, benchmark, Docker, docs, and reuse gates?
+
+decision_gates:
+  before_code:
+    - intent_written
+    - component_pack_selected
+    - architecture_rejected_alternatives_recorded
+    - benchmark_plan_defined
+    - no_secret_default_path_defined
+  before_publication:
+    - benchmark_json_committed
+    - readme_number_claim_result
+    - references_complete
+    - reuse_delta_resolved
+    - validation_passes
+
+reuse_loop:
+  ask_at:
+    - after scaffold
+    - after architecture decision
+    - after stack/library decision
+    - after benchmark implementation
+    - before publication
+  allowed_outcomes:
+    - patch-kit-now
+    - backlog-with-owner
+    - reject-with-reason

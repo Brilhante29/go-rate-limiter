@@ -1,0 +1,81 @@
+name: portfolio-system
+version: 1
+description: Portfolio workflow for projects that must prove a measurable claim and improve a reusable engineering layer.
+artifacts:
+  - id: intent
+    generates: intent.md
+    description: Measurable intent and scope.
+    template: intent.md
+    instruction: |
+      Create a concise intent artifact. Define the problem, measurable claim, explicit non-goals, no-secret default path, and expected public proof.
+    requires: []
+
+  - id: portfolio-impact
+    generates: portfolio-impact.md
+    description: Macro-project fit and proficiency signal.
+    template: portfolio-impact.md
+    instruction: |
+      Place this work in a portfolio program. Explain how it strengthens the system story, which repository group it belongs to, and what proficiency it proves.
+    requires:
+      - intent
+
+  - id: architecture-record
+    generates: architecture-record.md
+    description: Architecture, principles, and rejected alternatives.
+    template: architecture-record.md
+    instruction: |
+      Use the decision brain to select architecture, stack, API style, messaging, cloud mode, and library policy. Include rejected alternatives and testability evidence.
+    requires:
+      - intent
+
+  - id: component-pack
+    generates: component-pack.md
+    description: Selected component pack and agent workflow.
+    template: component-pack.md
+    instruction: |
+      Select the component pack. List required skills, templates, benchmark assets, decision sources, and publication gates.
+    requires:
+      - portfolio-impact
+      - architecture-record
+
+  - id: reuse-delta
+    generates: reuse-delta.md
+    description: Reuse-kit improvement review.
+    template: reuse-delta.md
+    instruction: |
+      Identify what this change taught the reuse kit. Resolve each candidate as patch-now, backlog, or reject with reason.
+    requires:
+      - component-pack
+
+  - id: benchmark-proof
+    generates: benchmark-proof.md
+    description: Benchmark plan and result contract.
+    template: benchmark-proof.md
+    instruction: |
+      Define metric, unit, direction, fixture, command, result path, target value, and how the README will present the number.
+    requires:
+      - architecture-record
+
+  - id: tasks
+    generates: tasks.md
+    description: Implementation checklist.
+    template: tasks.md
+    instruction: |
+      Create implementation tasks only after intent, impact, architecture, component pack, reuse delta, and benchmark proof are coherent.
+    requires:
+      - reuse-delta
+      - benchmark-proof
+
+  - id: verification
+    generates: verification.md
+    description: Final verification against specs and publication gates.
+    template: verification.md
+    instruction: |
+      Verify code, tests, Docker path, benchmark JSON, README result, references, reuse review, and validation output.
+    requires:
+      - tasks
+
+apply:
+  requires:
+    - tasks
+  tracks: tasks.md
