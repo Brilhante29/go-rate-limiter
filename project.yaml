@@ -7,7 +7,7 @@ program:
     - atomic Redis adapter pattern
     - multi-node load benchmark
     - p95 latency result contract
-status: benchmarked
+status: published
 claim: "Two HTTP nodes enforce one global token-bucket quota through atomic Redis state."
 stack:
   - go-1.26
@@ -106,7 +106,7 @@ design_system:
     - references_table
   diagram_required: true
 reuse:
-  kit_version: 113d649
+  kit_version: ad9d338
   uses:
     - catalog
     - programs

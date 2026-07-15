@@ -61,4 +61,4 @@ Go benchmark -> node-a + node-b -> shared Redis bucket -> result JSON
 - [x] Architecture and technical alternatives are recorded.
 - [x] Reuse improvements are patched, backlogged, or rejected.
 - [x] README and SDD contain the measured baseline.
-- [ ] GitHub CI is green on the published commit.
+- [x] GitHub CI is green on the published commit.

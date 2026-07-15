@@ -23,7 +23,7 @@ Provides the shared traffic-control primitive used by gateways and multi-tenant 
 
 ## Default Demo Path
 
-- Status: benchmarked
+- Status: published
 - Runtime: Go 1.26 static binary plus Redis 8.8
 - Benchmark command: `pwsh -NoProfile -File tools/benchmark.ps1`
 

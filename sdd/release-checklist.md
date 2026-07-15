@@ -12,4 +12,4 @@
 - [x] Project-specific code remains outside the reuse kit.
 - [x] OpenSpec artifacts are generated from the final manifest and result.
 - [x] Portfolio validation passes.
-- [ ] GitHub Actions is green on the published commit.
+- [x] GitHub Actions is green on the published commit.

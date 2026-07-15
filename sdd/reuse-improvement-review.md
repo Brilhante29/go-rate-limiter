@@ -9,7 +9,7 @@ Project: `12 - go-rate-limiter`
 - [x] after first working slice
 - [x] after benchmark result
 - [x] before publication
-- [ ] after CI failure, if applicable
+- [x] after CI failure, if applicable (not triggered; first CI passed)
 
 ## Findings
 
@@ -24,12 +24,13 @@ Project: `12 - go-rate-limiter`
 | Final validation did not require generated OpenSpec evidence | `patch_now` | templates/validation/docs | Required config and complete artifact graph before release | complete in kit `2087fec` |
 | Primary benchmark metric could disagree with the README headline | `patch_now` | templates/validation/docs | Cross-checked manifest metric, committed JSON, and README opening | complete in kit `113d649` |
 | Five earlier project manifests contained invalid YAML indentation | `patch_now` | templates/validation | Added top-level shape checks plus full PyYAML parsing when available; repaired all five | complete in kit `113d649` |
+| Generated OpenSpec publication tasks stopped before public CI | `patch_now` | openspec/tools/validation | Added CI success as an explicit generated publication gate | complete in kit `ad9d338` |
 | Multi-node correctness benchmark may recur in backend projects | `backlog` | harness | Extract only after a second project proves the same shape | recorded; avoid premature abstraction |
 | Redis Lua token bucket could be copied into the kit | `reject` | templates | Keep algorithm project-owned; the kit owns benchmark contracts, not domain behavior | rejected |
 
 ## Patch Now Decisions
 
-- Go-aware validation, robust OpenSpec generation, Markdown-safe output, and artifact-graph, manifest, and benchmark-claim release gates were added to the kit and resynced before publication.
+- Go-aware validation, robust OpenSpec generation, Markdown-safe output, and artifact-graph, manifest, benchmark-claim, and public-CI release gates were added to the kit and resynced before publication.
 
 ## Backlog Decisions
 
@@ -44,4 +45,4 @@ Project: `12 - go-rate-limiter`
 
 - [x] Reusable improvements were patched or recorded.
 - [x] Project-specific implementation was not moved into the kit.
-- [x] Validation reflects each repeated mistake discovered during this project, including Go, OpenSpec, YAML structure, and benchmark-claim gates.
+- [x] Validation reflects each repeated mistake discovered during this project, including Go, OpenSpec, YAML structure, benchmark-claim, and public-CI gates.

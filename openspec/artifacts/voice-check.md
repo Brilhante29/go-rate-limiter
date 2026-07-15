@@ -14,7 +14,7 @@ aligned (7/7)
 
 | Source | Words | Avg sentence words | Headings | Bullets | Numbers | Evidence words | Hype words |
 |---|---:|---:|---:|---:|---:|---:|---:|
-| existing docs | 1382 | 10.5 | 31 | 68 | 93 | 70 | 0 |
+| existing docs | 1383 | 10.6 | 31 | 68 | 93 | 70 | 0 |
 | generated article | 190 | 10.2 | 1 | 0 | 5 | 11 | 0 |
 
 ## Checks

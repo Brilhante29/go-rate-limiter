@@ -23,7 +23,7 @@ Project: `12 - go-rate-limiter`
 | language-profile-agent | `cmd`, `internal`, colocated tests, race/vet/bench gates | repository layout and CI | complete |
 | benchmark-harness-agent | Two-node correctness-aware Go runner plus k6 profile | `internal/loadbench`, `benchmarks/k6.js` | complete |
 | security-reuse-reviewer | bounded input, fail closed, no secrets, attributed references | API, code, `REFERENCES.md` | complete |
-| release-ci-publisher | Measured baseline and local validation complete; GitHub publication and CI pending | workflow and release checklist | in progress |
+| release-ci-publisher | Published repository and verified the complete GitHub Actions pipeline | workflow and release checklist | complete |
 
 ## Architecture Boundaries
 
@@ -54,4 +54,4 @@ Project: `12 - go-rate-limiter`
 - [x] Architecture, API, references, and reuse review are complete.
 - [x] No secret or paid service is required.
 - [x] Project validation passes.
-- [ ] GitHub CI passes on the published commit.
+- [x] GitHub CI passes on the published commit.
