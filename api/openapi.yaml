@@ -1,0 +1,88 @@
+openapi: 3.1.0
+info:
+  title: Go Distributed Rate Limiter
+  version: 1.0.0
+  description: Atomic token-bucket decisions shared by multiple application nodes through Redis.
+paths:
+  /healthz:
+    get:
+      summary: Report node and backing-store health
+      operationId: getHealth
+      responses:
+        "200":
+          description: Node and store are available
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Health"
+        "503":
+          description: Backing store is unavailable
+  /v1/limits/{key}/check:
+    post:
+      summary: Consume tokens from a globally shared bucket
+      operationId: checkLimit
+      parameters:
+        - name: key
+          in: path
+          required: true
+          schema:
+            type: string
+            pattern: "^[A-Za-z0-9][A-Za-z0-9._:-]{0,127}$"
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              properties:
+                cost:
+                  type: integer
+                  minimum: 1
+                  default: 1
+      responses:
+        "200":
+          description: Request accepted
+          headers:
+            X-Rate-Limiter-Node:
+              schema: { type: string }
+            X-RateLimit-Limit:
+              schema: { type: integer }
+            X-RateLimit-Remaining:
+              schema: { type: integer }
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Decision"
+        "400":
+          description: Invalid key, cost, or body
+        "429":
+          description: Request rejected by the global limit
+          headers:
+            Retry-After:
+              schema: { type: integer }
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Decision"
+        "503":
+          description: Backing store is unavailable
+components:
+  schemas:
+    Health:
+      type: object
+      required: [status, node, store]
+      properties:
+        status: { type: string }
+        node: { type: string }
+        store: { type: string }
+    Decision:
+      type: object
+      required: [allowed, remaining, retry_after_ms, rate_per_second, burst, node]
+      properties:
+        allowed: { type: boolean }
+        remaining: { type: integer }
+        retry_after_ms: { type: integer }
+        rate_per_second: { type: number }
+        burst: { type: integer }
+        node: { type: string }

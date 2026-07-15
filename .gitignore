@@ -1,8 +1,9 @@
-__pycache__/
-.pytest_cache/
-.ruff_cache/
-.venv/
-benchmarks/results/*.json
-dist/
-target/
-build/
+.env
+.idea/
+.vscode/
+bin/
+coverage.out
+coverage.html
+*.exe
+*.test
+*.prof

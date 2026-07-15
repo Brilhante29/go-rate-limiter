@@ -4,60 +4,61 @@
 
 #12
 
-## Claim
+## Measurable Claim
 
-Este projeto prova que: rate limiter distribuido.
+Two independently addressed HTTP nodes enforce one global token-bucket quota through atomic Redis state.
 
-## Stack
+## Acceptance Criteria
 
-go, redis, chi, k6, docker
-
-## User-visible output
-
-- Docker command: pending
-- README opens with: # #12 go-rate-limiter
-- Benchmark table: accepted_rps, rejected_rps, p95_latency_ms
+- A request accepted by either node decrements the same bucket.
+- Concurrent decisions cannot admit more than `burst + rate * elapsed` tokens, allowing one token for timing precision.
+- Excess traffic returns HTTP 429 with remaining tokens and retry delay.
+- Redis failures fail closed with HTTP 503.
+- The benchmark reaches both node identities, records no unexpected response, and produces portfolio-compatible JSON.
+- `docker run --rm go-rate-limiter` executes the complete proof without a paid secret.
 
 ## Scope
 
 In:
 
-- Implementar o menor produto funcional que prove o claim.
-- Rodar por Docker.
-- Gerar benchmark JSON reproduzivel.
+- token-bucket policy with configurable rate, burst, key, and request cost;
+- Redis-backed atomic adapter and deterministic memory adapter;
+- REST API and OpenAPI contract;
+- two-node Docker demo, Compose topology, Go benchmark, and k6 profile;
+- unit, race, vet, allocation, integration, and portfolio validation gates.
 
 Out:
 
-- Publicar repo antes do primeiro resultado numerico.
-- Depender de segredo pago para o caminho default.
+- multi-region quota semantics;
+- Redis Cluster or Sentinel failover claims;
+- dynamic policy administration or control plane;
+- authentication, billing, or tenant provisioning;
+- message brokers, GraphQL, gRPC, or cloud SDKs.
 
 ## Architecture
 
-`	xt
-client -> app -> domain -> adapters -> benchmark output
-`
+```text
+HTTP/chi -> limiter service -> BucketStore port <- Redis Lua adapter
+                                ^
+                                `- memory adapter for unit/local use
 
-## Benchmark
+Go benchmark -> node-a + node-b -> shared Redis bucket -> result JSON
+```
 
-Primary metric:
+## Failure Behavior
 
-- name: accepted_rps, rejected_rps, p95_latency_ms
-- target: first reproducible baseline
-- command: pending
-- result file: enchmarks/results/*.json
+- Invalid key/cost/body: `400`.
+- Exhausted bucket: `429`; this is an expected decision, not an infrastructure error.
+- Redis unavailable or script error: `503`; no request is admitted speculatively.
+- Missing node, unexpected status, benchmark error, or quota violation: benchmark exits non-zero.
 
-## Dataset or fixture
+## Definition Of Done
 
-- source: pending
-- size: pending
-- license: pending
-- deterministic seed: 42
-
-## Definition of done
-
-- [ ] Docker command works from clean clone.
-- [ ] README starts with project number and benchmark result.
-- [ ] Benchmark command writes JSON result.
-- [ ] Tests cover core behavior.
-- [ ] REFERENCES.md explains reuse.
-- [ ] No secret or paid credential required for default demo.
+- [x] Docker command is self-contained.
+- [x] Core behavior has deterministic and concurrent tests.
+- [x] API contract is versioned.
+- [x] Benchmark writes JSON and checks the global invariant.
+- [x] Architecture and technical alternatives are recorded.
+- [x] Reuse improvements are patched, backlogged, or rejected.
+- [x] README and SDD contain the measured baseline.
+- [ ] GitHub CI is green on the published commit.

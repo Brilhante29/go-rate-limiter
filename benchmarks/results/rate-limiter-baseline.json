@@ -1,0 +1,35 @@
+{
+  "project": "go-rate-limiter",
+  "metric": "total_rps",
+  "value": 11511.03,
+  "unit": "requests_per_second",
+  "timestamp": "2026-07-15T16:46:01Z",
+  "command": "docker run --rm go-rate-limiter",
+  "repeat": 1,
+  "summary": {
+    "accepted_rps": 1083.62,
+    "max_expected_accepted": 11003,
+    "nodes_observed": 2,
+    "p95_latency_ms": 11.985,
+    "rejected_rps": 10427.4,
+    "total_rps": 11511.03
+  },
+  "environment": {
+    "arch": "amd64",
+    "cpus": "16",
+    "go": "go1.26.5",
+    "os": "linux",
+    "store": "redis"
+  },
+  "duration_seconds": 10.002,
+  "concurrency": 64,
+  "total_requests": 115129,
+  "accepted": 10838,
+  "rejected": 104291,
+  "errors": 0,
+  "nodes": [
+    "node-a",
+    "node-b"
+  ],
+  "global_limit_preserved": true
+}

@@ -4,7 +4,7 @@
   "type": "object",
   "required": ["id", "name", "program", "status", "claim", "stack", "language_profile", "decision_brain", "architecture", "design_system", "benchmark", "release"],
   "properties": {
-    "id": { "type": "integer", "minimum": 1, "maximum": 30 },
+    "id": { "type": "integer", "minimum": 1 },
     "name": { "type": "string", "pattern": "^[a-z0-9][a-z0-9-]*$" },
     "program": {
       "type": "object",

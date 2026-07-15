@@ -1,0 +1,133 @@
+id: 12
+name: go-rate-limiter
+program:
+  id: backend-reliability-platform
+  narrative_fit: "Provides the shared traffic-control primitive used by gateways and multi-tenant services in the backend reliability program."
+  shared_assets:
+    - atomic Redis adapter pattern
+    - multi-node load benchmark
+    - p95 latency result contract
+status: benchmarked
+claim: "Two HTTP nodes enforce one global token-bucket quota through atomic Redis state."
+stack:
+  - go-1.26
+  - chi-v5
+  - redis-8.8
+  - go-redis-v9
+  - lua
+  - k6
+  - docker
+language_profile:
+  primary: go-backend
+  secondary: []
+  reason: "Go makes concurrency, HTTP overhead, allocation behavior, and back-pressure visible in a small service."
+decision_brain:
+  agentic_spec:
+    source: .portfolio/decision-brain/agentic-spec-governance.yaml
+    spec_store: portfolio-reuse-kit
+    schema: portfolio-system
+    project_config: openspec/config.yaml
+    component_pack: backend-reliability-platform
+    artifact_graph:
+      - intent->portfolio-impact->architecture-record
+      - architecture-record+portfolio-impact->component-pack
+      - component-pack->reuse-delta->benchmark-proof->tasks->verification
+  agent_graph:
+    mode: principal-agent-orchestrated
+    source: .portfolio/decision-brain/agent-graph.yaml
+    handoff: sdd/agent-handoff.md
+    local_first_runtime: docker
+  reuse_improvement_loop:
+    source: .portfolio/decision-brain/reuse-improvement-loop.yaml
+    review_path: sdd/reuse-improvement-review.md
+    current_status: reviewed
+  principles:
+    coupling_rule: "The limiter service depends on a bucket-store port; Redis, memory, HTTP, and process orchestration remain adapters."
+    solid: [srp, ocp, lsp, isp, dip]
+    simplicity_rule: "Use one policy, one atomic script, and one REST operation; do not add brokers, service mesh, or control plane."
+    testability_rule: "Policy and the in-memory adapter run without HTTP or Redis; the Docker demo verifies Redis and two nodes."
+    rejected_overengineering:
+      - microservices control plane
+      - Kafka or RabbitMQ
+      - GraphQL schema
+      - cloud-managed datastore
+  stack_profile: go-backend
+  api_style: rest-http
+  messaging: none
+  cloud:
+    mode: none
+    local_provider: none
+    real_provider_target: none
+    emulated_services: []
+    adapter_rule: "No cloud SDK enters the core; a future managed Redis endpoint changes configuration, not policy."
+    config_switch: CLOUD_PROVIDER=none
+    unsupported_behaviors:
+      - multi-region Redis replication semantics
+  database: redis
+  runtime: "Go 1.26 static binary plus Redis 8.8"
+  library_policy: "chi preserves net/http compatibility; go-redis is the official Redis client; the atomic Lua script is project-owned."
+  record_path: sdd/technical-decision.md
+  rejected_options:
+    - option: in-memory-only limiter
+      reason: "It cannot preserve one quota across independent nodes."
+    - option: GraphQL
+      reason: "A single command-style decision endpoint gains no useful query flexibility."
+    - option: Kafka or RabbitMQ
+      reason: "Asynchronous messaging cannot provide the synchronous atomic decision required on the request path."
+architecture:
+  style: hexagonal
+  reason: "The hard boundary is substituting local memory and remote atomic Redis behavior without coupling policy or HTTP to either adapter."
+  problem_forces:
+    domain_complexity: medium
+    integration_pressure: high
+    ui_state_complexity: none
+    data_or_ml_reproducibility: low
+    auditability: low
+    throughput_or_async: high
+    independent_deployability: medium
+  dependency_rule: "HTTP and store adapters depend inward on limiter ports and types; limiter code imports no framework or Redis package."
+  boundaries:
+    - limiter policy and application service
+    - bucket-store output port
+    - Redis and memory output adapters
+    - chi HTTP input adapter
+    - load benchmark and demo orchestration
+  rejected_alternatives:
+    - style: layered
+      reason: "A conventional persistence layer would hide the substitutable atomic-store contract that the project must prove."
+    - style: microservices
+      reason: "Multiple deployable business services add failure modes without improving the shared-quota proof."
+design_system:
+  tokens: .portfolio/design-system/tokens.yaml
+  readme_components:
+    - readme_header
+    - benchmark_card
+    - architecture_card
+    - references_table
+  diagram_required: true
+reuse:
+  kit_version: 113d649
+  uses:
+    - catalog
+    - programs
+    - component-packs
+    - openspec-schema
+    - decision-brain
+    - agent-graph
+    - reuse-improvement-loop
+    - architecture
+    - go-backend-profile
+    - design-system
+    - sdd
+    - benchmark-contract
+    - skills
+benchmark:
+  primary_metric: total_rps
+  unit: requests_per_second
+  command: pwsh -NoProfile -File tools/benchmark.ps1
+  result_path: benchmarks/results/rate-limiter-baseline.json
+release:
+  docker: docker run --rm go-rate-limiter
+  no_secret_default_path: true
+  readme_has_number: true
+  references_documented: true

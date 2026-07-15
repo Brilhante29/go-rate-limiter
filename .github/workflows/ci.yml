@@ -1,0 +1,35 @@
+name: ci
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-go@v6
+        with:
+          go-version-file: go.mod
+          cache-dependency-path: go.sum
+      - name: Verify modules
+        run: go mod verify
+      - name: Test with race detector
+        run: go test -race ./...
+      - name: Vet
+        run: go vet ./...
+      - name: Allocation benchmark
+        run: go test -run '^$' -bench BenchmarkMemoryStoreTake -benchmem ./internal/limiter
+      - name: Build self-contained image
+        run: docker build -t go-rate-limiter .
+      - name: Verify distributed Docker demo
+        run: docker run --rm go-rate-limiter demo --duration 1s --concurrency 16 --rate 200 --burst 200 --output /tmp/result.json
+      - name: Validate portfolio contract
+        shell: pwsh
+        run: ./tools/validate-project.ps1 -SkipDocker
