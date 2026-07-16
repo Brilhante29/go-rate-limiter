@@ -1,0 +1,31 @@
+version: 1
+name: portfolio-agent-context
+purpose: >
+  Keep one tool-agnostic context contract for Codex, Claude Code, and optional
+  Claude Code Templates components from aitmpl.com.
+
+source_of_truth:
+  manifest: project.yaml
+  decisions: .portfolio/decision-brain
+  architecture: .portfolio/architecture
+  sdd: sdd
+  openspec: openspec
+  generated_context: .aitmpl/context-card.md
+
+agent_targets:
+  - codex
+  - claude
+
+local_components:
+  codex_skills: .codex/skills
+  claude_skills: .claude/skills
+  shared_instructions: AGENTS.md
+  claude_instructions: CLAUDE.md
+
+external_adapter:
+  enabled: false
+  package: claude-code-templates
+  install_command: npx claude-code-templates@latest
+  policy: >
+    External components are optional accelerators. They must not replace local
+    skills, decision records, validation, or benchmark evidence silently.
