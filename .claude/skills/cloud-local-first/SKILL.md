@@ -1,33 +1,34 @@
 ---
 name: cloud-local-first
-description: Apply the portfolio cloud local-first rule: use sivchari/kumo as the default local AWS emulator, keep cloud providers behind ports/adapters, and make real AWS pluggable through configuration and parity tests.
+description: Apply the portfolio cloud local-first rule with Kumo pinned by digest, narrow ports, guarded real AWS switching, scoped parity tests, and numeric compatibility diagnostics.
 ---
 
 # Cloud Local First
 
-Use this skill whenever a repository touches cloud-like services: object storage, queues, pub/sub, event bus, secrets, serverless functions, API gateway, NoSQL, streams, monitoring, or AWS-compatible SDKs.
+Use this skill whenever a repository touches AWS-compatible storage, queues, pub/sub, events, secrets, functions, API gateway, NoSQL, streams, monitoring, or SDKs.
 
 1. Read `decision-brain/cloud-matrix.yaml` or `.portfolio/decision-brain/cloud-matrix.yaml`.
-2. Use Kumo as the default local provider for AWS-like services.
-3. Add a local Docker path for Kumo on port `4566`.
+2. Use the reviewed Kumo release as the default local provider.
+3. Pin the Kumo image by readable version tag and immutable digest; reject committed mutable references.
 4. Keep local credentials non-secret: `test/test` or equivalent.
-5. Add ports/interfaces for every cloud capability used by the application.
-6. Put Kumo and real cloud SDK calls in adapters only; do not call cloud SDKs from domain or use cases.
-7. Make provider switching configurable, usually `CLOUD_PROVIDER=kumo|aws` plus endpoint override.
-8. Add parity tests that run against Kumo for the default path.
-9. Document unsupported Kumo behaviors when real cloud behavior cannot be fully emulated.
-10. Update `project.yaml` with `decision_brain.cloud`.
+5. Add narrow ports/interfaces for every claimed cloud capability.
+6. Keep AWS SDK calls in adapters; domain and use cases depend only on ports.
+7. Use one adapter configuration path: Kumo adds endpoint override, real AWS uses default endpoints.
+8. Require an explicit destructive-action guard and unique run ID before real AWS execution.
+9. Add scoped parity/conformance checks and list every unsupported behavior.
+10. Include provider version, digest, SDK version, region, operation counts, and compatibility diagnostics in benchmark JSON.
+11. Update `project.yaml` and `sdd/reuse-improvement-review.md` after the benchmark.
 
-Default command:
+Reviewed command:
 
 ```powershell
-docker run -p 4566:4566 ghcr.io/sivchari/kumo:latest
+docker run -p 4566:4566 ghcr.io/sivchari/kumo:0.25.3@sha256:7ea090ae0b6d1d34615e8b7bd04a2f1cd864ec640a6826a91e90f40e975e196b
 ```
 
 Persistent local path:
 
 ```powershell
-docker run -p 4566:4566 -e KUMO_DATA_DIR=/data -v kumo-data:/data ghcr.io/sivchari/kumo:latest
+docker run -p 4566:4566 -e KUMO_DATA_DIR=/data -v kumo-data:/data ghcr.io/sivchari/kumo:0.25.3@sha256:7ea090ae0b6d1d34615e8b7bd04a2f1cd864ec640a6826a91e90f40e975e196b
 ```
 
-Rule: cloud real is never the default demo path. The portfolio proof must run locally first.
+Do not claim full AWS conformance from a scoped emulator suite. Real cloud is never the default demo path.

@@ -4,8 +4,13 @@ default_local_provider:
   name: kumo
   source: "https://github.com/sivchari/kumo"
   description: "Lightweight AWS service emulator written in Go."
-  docker: "docker run -p 4566:4566 ghcr.io/sivchari/kumo:latest"
-  persistent_docker: "docker run -p 4566:4566 -e KUMO_DATA_DIR=/data -v kumo-data:/data ghcr.io/sivchari/kumo:latest"
+  release_tag: v0.25.3
+  image_tag: 0.25.3
+  image_digest: "sha256:7ea090ae0b6d1d34615e8b7bd04a2f1cd864ec640a6826a91e90f40e975e196b"
+  verified_at: 2026-07-15
+  publication_note: "Kumo release tags include v; GoReleaser container tags use the version without v."
+  docker: "docker run -p 4566:4566 ghcr.io/sivchari/kumo:0.25.3@sha256:7ea090ae0b6d1d34615e8b7bd04a2f1cd864ec640a6826a91e90f40e975e196b"
+  persistent_docker: "docker run -p 4566:4566 -e KUMO_DATA_DIR=/data -v kumo-data:/data ghcr.io/sivchari/kumo:0.25.3@sha256:7ea090ae0b6d1d34615e8b7bd04a2f1cd864ec640a6826a91e90f40e975e196b"
   endpoint: "http://localhost:4566"
   auth: "static test/test credentials for local and CI"
   persistence: "optional with KUMO_DATA_DIR"
@@ -18,6 +23,8 @@ required_decision_fields:
   - config_switch
   - parity_tests
   - unsupported_behaviors
+  - provider_version_and_digest
+  - compatibility_diagnostics
 modes:
   local-first-required:
     rule: "Every cloud-backed project must run locally with Kumo unless the project proves a non-AWS provider only."
@@ -28,6 +35,8 @@ modes:
       - adapter interface for each cloud capability
       - fake/emulator parity test
       - README section showing local-first path
+      - image tag and digest recorded in benchmark JSON
+      - numeric SDK compatibility diagnostics when warnings are handled
   real-cloud-pluggable:
     rule: "Real cloud providers are adapters behind the same ports used by Kumo."
     required_artifacts:
@@ -102,3 +111,6 @@ rejection_rules:
   - reject code that cannot switch endpoint/provider via configuration
   - reject cloud decisions without parity tests or documented unsupported behaviors
   - reject infrastructure-only cloud proof without local runnable path
+  - reject mutable Kumo image references in committed artifacts
+  - reject full AWS conformance claims from a scoped emulator suite
+  - reject swallowed SDK warnings; expose intentionally handled warnings as numeric diagnostics
