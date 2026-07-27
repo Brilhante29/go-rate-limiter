@@ -1,0 +1,69 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://portfolio-reuse-kit.local/contracts/monitoring-batch.schema.json",
+  "title": "PortfolioMonitoringBatchManifest",
+  "description": "Versioned manifest for local-first, auditable tabular monitoring batches.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "kind", "batch_id", "captured_at", "producer", "model", "data", "columns"],
+  "properties": {
+    "schema_version": { "const": 1 },
+    "kind": { "const": "tabular-monitoring-batch" },
+    "batch_id": { "type": "string", "minLength": 1, "maxLength": 128, "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]*$" },
+    "captured_at": { "type": "string", "format": "date-time" },
+    "producer": { "$ref": "#/$defs/producer" },
+    "model": { "$ref": "#/$defs/model" },
+    "data": { "$ref": "#/$defs/data" },
+    "columns": {
+      "type": "array",
+      "minItems": 2,
+      "maxItems": 256,
+      "items": { "$ref": "#/$defs/column" },
+      "contains": { "type": "object", "required": ["role"], "properties": { "role": { "const": "feature" } } },
+      "minContains": 1,
+      "allOf": [{
+        "contains": { "type": "object", "required": ["role"], "properties": { "role": { "const": "prediction" } } },
+        "minContains": 1
+      }]
+    }
+  },
+  "$defs": {
+    "producer": {
+      "type": "object", "additionalProperties": false, "required": ["project", "version"],
+      "properties": {
+        "project": { "type": "string", "minLength": 1, "maxLength": 128 },
+        "version": { "type": "string", "minLength": 1, "maxLength": 128 }
+      }
+    },
+    "model": {
+      "type": "object", "additionalProperties": false, "required": ["id", "version"],
+      "properties": {
+        "id": { "type": "string", "minLength": 1, "maxLength": 128 },
+        "version": { "type": "string", "minLength": 1, "maxLength": 128 }
+      }
+    },
+    "data": {
+      "type": "object", "additionalProperties": false, "required": ["path", "format", "sha256", "bytes", "rows"],
+      "properties": {
+        "path": { "type": "string", "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]*$" },
+        "format": { "enum": ["csv", "jsonl", "parquet"] },
+        "sha256": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+        "bytes": { "type": "integer", "minimum": 1, "maximum": 67108864 },
+        "rows": { "type": "integer", "minimum": 1, "maximum": 1000000 }
+      }
+    },
+    "column": {
+      "type": "object", "additionalProperties": false, "required": ["name", "role", "data_type", "nullable"],
+      "properties": {
+        "name": { "type": "string", "minLength": 1, "maxLength": 128, "pattern": "^[A-Za-z_][A-Za-z0-9_]*$" },
+        "role": { "enum": ["feature", "prediction", "target", "timestamp", "identifier"] },
+        "data_type": { "enum": ["float64", "int64", "string", "boolean", "datetime"] },
+        "nullable": { "type": "boolean" }
+      },
+      "allOf": [{
+        "if": { "properties": { "role": { "enum": ["feature", "prediction"] } } },
+        "then": { "properties": { "data_type": { "enum": ["float64", "int64"] }, "nullable": { "const": false } } }
+      }]
+    }
+  }
+}

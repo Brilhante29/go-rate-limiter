@@ -1,0 +1,113 @@
+schema {
+  query: Query
+}
+
+scalar DateTime
+scalar JSON
+
+type Query {
+  benchmarkRun(runId: ID!): BenchmarkRun
+  benchmarkRuns(
+    first: Int = 50
+    offset: Int = 0
+    project: String
+    benchmarkId: String
+    comparabilityKey: String
+    status: EvidenceStatus
+  ): BenchmarkRunConnection!
+  compareBenchmarkRuns(runIds: [ID!]!): BenchmarkComparison!
+}
+
+enum EvidenceStatus {
+  ACCEPTED
+  QUARANTINED
+  PUBLICATION_APPROVED
+  PUBLICATION_REJECTED
+}
+
+enum MetricDirection {
+  HIGHER_IS_BETTER
+  LOWER_IS_BETTER
+  TARGET
+}
+
+type BenchmarkRunConnection {
+  items: [BenchmarkRun!]!
+  totalCount: Int!
+  pageInfo: OffsetPageInfo!
+}
+
+type OffsetPageInfo {
+  offset: Int!
+  first: Int!
+  hasNextPage: Boolean!
+}
+
+type BenchmarkRun {
+  runId: ID!
+  schemaVersion: Int!
+  project: String!
+  benchmarkId: String!
+  comparabilityKey: String!
+  status: EvidenceStatus!
+  workload: Workload!
+  metrics: [BenchmarkMetric!]!
+  execution: Execution!
+  environment: JSON!
+  provenance: Provenance!
+}
+
+type Workload {
+  version: String!
+  fixtureDigest: String!
+  configDigest: String!
+  warmupIterations: Int!
+  measuredIterations: Int!
+  concurrency: Int!
+}
+
+type BenchmarkMetric {
+  name: String!
+  value: Float!
+  unit: String!
+  direction: MetricDirection!
+  samples: [Float!]!
+  failures: Int!
+  summary: JSON!
+}
+
+type Execution {
+  command: String!
+  startedAt: DateTime!
+  durationSeconds: Float!
+  exitCode: Int!
+  repeat: Int!
+}
+
+type Provenance {
+  sourceCommit: String!
+  cleanTree: Boolean!
+  imageRef: String!
+  imageDigest: String!
+  dependencyLockDigest: String!
+  producer: String!
+  ciRunUrl: String
+  artifactDigest: String!
+}
+
+type BenchmarkComparison {
+  comparable: Boolean!
+  reason: String
+  comparabilityKey: String
+  runs: [BenchmarkRun!]!
+  metricDeltas: [MetricDelta!]!
+}
+
+type MetricDelta {
+  metricName: String!
+  unit: String!
+  baselineRunId: ID!
+  candidateRunId: ID!
+  absoluteDelta: Float!
+  percentDelta: Float
+}

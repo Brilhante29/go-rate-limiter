@@ -1,0 +1,87 @@
+{
+  "assets": {
+    "benchmark-result-v2.schema.json": {
+      "bytes": 3741,
+      "sha256": "sha256:821a16388913afb19fe70e37256138528126ed6fa14ef06f74191f5608e86c7a"
+    },
+    "benchmark-result.schema.json": {
+      "bytes": 746,
+      "sha256": "sha256:7df83b5774b363ff6b23a902595c50a5d34a89e66866d898a9dac43fb807a9de"
+    },
+    "execution-event.schema.json": {
+      "bytes": 1988,
+      "sha256": "sha256:c7a8cc93670344aca800aeabe0f4afd25466df8944717bd916c59d0f51508cbb"
+    },
+    "fixtures/benchmark-result-v2.invalid.json": {
+      "bytes": 175,
+      "sha256": "sha256:daec8daaea1b53a23b80c8101a29954e5811e6fcaa9a9952150904e08aeef3e3"
+    },
+    "fixtures/benchmark-result-v2.valid.json": {
+      "bytes": 1749,
+      "sha256": "sha256:0074aeacec5abbc6d5938d6ae330160865d5d866237df0ae76d0425b27e1da2e"
+    },
+    "fixtures/project.invalid.json": {
+      "bytes": 11193,
+      "sha256": "sha256:c919848407d2eaa974eb461239d6bdab826919f16b0c9d8c585f999c7e79827a"
+    },
+    "fixtures/project.jvm-profile-missing-jvm.invalid.json": {
+      "bytes": 10255,
+      "sha256": "sha256:1b8e3968d8cba729b6bc241e43be05a2ba6d43a792abce275eb9a133a8bb5a21"
+    },
+    "fixtures/project.kafka-mode-mismatch.invalid.json": {
+      "bytes": 11193,
+      "sha256": "sha256:61ac0124f62414961f20e261a25e6d4d1c6461b23404c432abd1717454fe3ae0"
+    },
+    "fixtures/project.kafka-selected-brain-none.invalid.json": {
+      "bytes": 7409,
+      "sha256": "sha256:28908f67fd9172faf316f5dbcc8c28f7d6c2faf78fc110b64027df719cbe352b"
+    },
+    "fixtures/project.kafka-streams-orphan.invalid.json": {
+      "bytes": 10404,
+      "sha256": "sha256:45ef251f2098ce568db7c30df8b3393f623053e7c30d3e95c225997edfaff0e9"
+    },
+    "fixtures/project.legacy.valid.json": {
+      "bytes": 5097,
+      "sha256": "sha256:fc7994fd04769a7b1a8bcabc665a179eb01515b0bfe81ff42b3932db8ec11f58"
+    },
+    "fixtures/project.non-jvm.valid.json": {
+      "bytes": 6373,
+      "sha256": "sha256:193e920ae1f80f337fa3a941c9a1294384fc1c2989e803b5c7d379c7760496b1"
+    },
+    "fixtures/project.unknown-wrapper-checksum.invalid.json": {
+      "bytes": 11195,
+      "sha256": "sha256:24635cbc590d30d144e8dc1b995471a7d5f20042855b1e8697035ecb7efb228a"
+    },
+    "fixtures/project.valid.json": {
+      "bytes": 11195,
+      "sha256": "sha256:09c04f9bfbf63b58d5afcc59044b0431ca16a0eb8a7c8e1b6a1a850518560608"
+    },
+    "fixtures/project.wrapper-pair-mismatch.invalid.json": {
+      "bytes": 11193,
+      "sha256": "sha256:9a40ded483840249752f97e81d8c9b78466f72c0e46940aa63a143530188a85e"
+    },
+    "monitoring-batch.schema.json": {
+      "bytes": 3153,
+      "sha256": "sha256:1684fb18436414e8e2dbf7e0785bae56ea49f5eb18c28d4cad72947f7df9aef4"
+    },
+    "portfolio-evidence.graphql": {
+      "bytes": 1937,
+      "sha256": "sha256:197a2b067f7a4482c3cab553bb127accc0ba8c27df443f76a8e8611a445e4d09"
+    },
+    "portfolio-evidence.openapi.yaml": {
+      "bytes": 6048,
+      "sha256": "sha256:cc92dab0c92e95e7ce19feb396706f3d9456a611bbf0704d11c4d4ea20a3583a"
+    },
+    "project.schema.json": {
+      "bytes": 25195,
+      "sha256": "sha256:fd05d067cb1b98119c8d2f1e7b1c5565632710850409cd3ffd94d675288eac12"
+    },
+    "publication-evidence.schema.json": {
+      "bytes": 983,
+      "sha256": "sha256:4a69fe3b65b66dde595216d1014e210545a62db3c4d1bcdcf6d2dd1fe42373a3"
+    }
+  },
+  "contract_set": "portfolio-interoperability",
+  "contract_set_version": "1.2.0",
+  "schema_version": 1
+}

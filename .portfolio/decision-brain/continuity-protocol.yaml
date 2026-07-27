@@ -1,0 +1,51 @@
+version: 1
+principle: "Preserve decision continuity before quota, context, or tool limits interrupt delivery. Record auditable engineering state, never private chain-of-thought."
+canonical_handoff: .portfolio-control/CURRENT_HANDOFF.md
+mechanical_snapshot: .portfolio-control/CONTINUITY_STATE.md
+quota_observability:
+  exact_account_balance_available: false
+  fallback: "Treat a user quota warning as immediate; otherwise checkpoint at objective milestones and before long-running work."
+triggers:
+  immediate:
+    - user reports weekly quota or model limit is near
+    - context compaction or interruption is likely
+    - a command or agent session will outlive the current interaction window
+  milestone:
+    - before and after a pull request or merge
+    - after a benchmark baseline changes
+    - after a publication status or blocker changes
+    - before starting a new repository
+  efficiency:
+    - the same failure occurs twice
+    - two heavy write agents are already active
+    - more than one worktree could be mistaken for the source of truth
+    - a repository audit is about to be repeated without changed heads
+checkpoint_contents:
+  required:
+    - goal and definition of done
+    - canonical repositories, branches, heads, and worktrees
+    - observed facts and evidence
+    - decisions and rejected alternatives
+    - completed validation with exact commands
+    - blockers and required user authorization
+    - dirty files that must be preserved
+    - next actions in strict critical-path order
+  prohibited:
+    - secrets or environment variable values
+    - private chain-of-thought
+    - invented benchmark or CI status
+    - stale counts presented as current
+wip_limits:
+  heavy_write_agents: 2
+  active_implementation_repositories: 2
+  primary_critical_path_item: 1
+exit_loop_rules:
+  - finish or explicitly park the current critical-path item before broad new audits
+  - do not reopen a completed inventory unless repository heads changed
+  - repair false claims before adding breadth
+  - publish a green repository before starting a dependent consumer
+  - use the reuse-improvement loop only for a concrete repeated gap
+automation:
+  command: tools/capture-continuity-state.ps1
+  snapshot_is_mechanical: true
+  handoff_requires_agent_judgment: true

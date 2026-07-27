@@ -1,0 +1,77 @@
+version: 1
+principle: "Choose Java, Kotlin, or a mixed JVM boundary from problem forces. A language migration must improve the model or evidence, not portfolio cosmetics."
+required_decision_fields:
+  - domain_forces
+  - language_choice
+  - interoperability_boundary
+  - gradle_wrapper_version
+  - rejected_alternatives
+  - benchmark_effect
+rules:
+  gradle_wrapper_required: true
+  kotlin_dsl_required: true
+  jvm_toolchain_required: true
+  same_quality_gates_for_java_and_kotlin: true
+  prohibit_language_benchmark_without_controlled_implementation: true
+  prohibit_coroutines_without_suspending_io: true
+  prohibit_framework_types_in_domain: true
+choices:
+  java:
+    use_when:
+      - Java records, sealed interfaces, virtual threads, or enterprise ecosystem are part of the proof
+      - a stable framework-free core must be callable from Kotlin and other JVM languages
+      - preserving explicit Java proficiency strengthens the program narrative
+  kotlin:
+    use_when:
+      - sealed state machines make invalid transitions unrepresentable
+      - null safety, value classes, or exhaustive matching reduce domain risk
+      - Spring Kotlin support materially reduces adapter or orchestration complexity
+  mixed:
+    use_when:
+      - Java owns stable domain contracts and Kotlin owns orchestration or adapters
+      - interoperability itself is exercised by contract and integration tests
+    constraints:
+      - dependencies point from adapters to core
+      - public Java APIs avoid Kotlin-only types
+      - nullability annotations are explicit at the Java boundary
+interoperability_contract:
+  direction_must_be_decided: true
+  public_api_rules:
+    - Java-facing APIs do not expose Unit, suspend, Kotlin function types, default arguments, value classes, or Kotlin-only collections
+    - Kotlin-facing Java APIs declare nullability and translate checked exceptions deliberately
+    - Java and Kotlin compilation targets equal the declared JVM toolchain
+  compatibility:
+    - binary API changes are detected for published libraries or shared modules
+    - Java-consuming-Kotlin and Kotlin-consuming-Java contract tests are required for mixed repositories
+    - the same semantic contract suite runs against in-memory and infrastructure adapters
+  architecture:
+    - framework and transport adapters depend on stable core contracts
+    - language direction follows ownership and consumer needs, not a fixed Java-core assumption
+  benchmark:
+    - interoperability overhead is measured only when it is material to the claim
+    - Java-versus-Kotlin comparisons require equivalent implementation, workload, warmup, runtime, and environment
+portfolio_decisions:
+  spring-hexagonal-payments:
+    choice: kotlin
+    reason: "Kotlin already models the transactional hexagonal service; retain it and strengthen concurrency and idempotency evidence."
+  event-sourcing-orders:
+    choice: java
+    reason: "Use modern Java records and sealed events while adding a real event store, optimistic concurrency, and incremental projections."
+  saga-orchestrator:
+    choice: kotlin
+    publication_blocker: "Implement durable compensation and compensation-failure states before migration."
+    reason: "Sealed outcomes and exhaustive transitions directly improve the saga state machine."
+  multi-tenant-starter:
+    choice: java
+    publication_blocker: "Replace in-memory maps with PostgreSQL schema routing, Flyway, rollback, and isolation tests."
+    reason: "The defect is missing tenancy semantics; changing language would not solve it."
+  cache-strategies-bench:
+    choice: java
+    reason: "Keep one implementation variable while comparing cache strategies against Redis and PostgreSQL."
+  outbox-pattern:
+    choice: mixed
+    publication_blocker: "Persist business data and outbox atomically before measuring reliability."
+    boundary: "Framework-free outbox core and contracts in Java; Spring runtime and infrastructure adapters in Kotlin."
+  kafka-streams-demo:
+    choice: kotlin
+    reason: "Keep the existing Kotlin topology and prove broker semantics, keys, failure handling, and wrapper reproducibility."

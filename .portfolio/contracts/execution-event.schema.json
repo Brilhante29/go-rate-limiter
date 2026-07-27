@@ -1,0 +1,59 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://portfolio.local/contracts/execution-event.schema.json",
+  "title": "Portfolio execution event",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "event_id",
+    "recorded_at",
+    "actor",
+    "phase",
+    "category",
+    "outcome",
+    "occurrences",
+    "duration_seconds",
+    "avoidable",
+    "excluded_from_efficiency",
+    "evidence",
+    "cause",
+    "remediation"
+  ],
+  "properties": {
+    "schema_version": { "const": 1 },
+    "event_id": { "type": "string", "pattern": "^[a-z0-9][a-z0-9._-]{2,127}$" },
+    "recorded_at": { "type": "string", "format": "date-time" },
+    "source_window": { "type": "string", "minLength": 1 },
+    "actor": { "type": "string", "enum": ["principal-agent", "subagent", "user", "external-tool"] },
+    "tool": { "type": "string", "minLength": 1 },
+    "repository": { "type": "string", "pattern": "^[a-z0-9][a-z0-9._-]*$" },
+    "phase": {
+      "type": "string",
+      "enum": ["discovery", "delegation", "implementation", "validation", "benchmark", "docker", "publication", "reporting"]
+    },
+    "category": {
+      "type": "string",
+      "enum": [
+        "authorization-limit",
+        "wait-timeout",
+        "command-timeout",
+        "agent-no-progress",
+        "tool-failure",
+        "invalid-command",
+        "invalid-diagnostic",
+        "redundant-work",
+        "external-auth-failure",
+        "excluded-window"
+      ]
+    },
+    "outcome": { "type": "string", "enum": ["blocked", "no-progress", "partial", "recovered"] },
+    "occurrences": { "type": "integer", "minimum": 1 },
+    "duration_seconds": { "type": "number", "minimum": 0 },
+    "avoidable": { "type": "boolean" },
+    "excluded_from_efficiency": { "type": "boolean" },
+    "evidence": { "type": "string", "minLength": 1 },
+    "cause": { "type": "string", "minLength": 1 },
+    "remediation": { "type": "string", "minLength": 1 }
+  }
+}

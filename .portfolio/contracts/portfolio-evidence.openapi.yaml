@@ -1,0 +1,212 @@
+openapi: 3.1.0
+info:
+  title: Portfolio Evidence Command API
+  version: 1.1.0
+  description: Stable REST boundary for evidence ingestion and audited operational commands.
+servers:
+  - url: http://localhost:3000
+tags:
+  - name: evidence
+  - name: operations
+paths:
+  /v1/evidence/benchmark-runs:
+    post:
+      tags: [evidence]
+      operationId: ingestBenchmarkRun
+      summary: Validate and persist one benchmark-result-v2 document
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: ./benchmark-result-v2.schema.json
+      responses:
+        '201':
+          description: Evidence accepted
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/IngestReceipt'
+        '400':
+          $ref: '#/components/responses/InvalidEvidence'
+        '409':
+          $ref: '#/components/responses/Conflict'
+  /v1/operations/benchmark-runs/{runId}/revalidate:
+    parameters:
+      - $ref: '#/components/parameters/RunId'
+    post:
+      tags: [operations]
+      operationId: revalidateBenchmarkRun
+      summary: Re-run contract and publication-readiness validation idempotently
+      parameters:
+        - $ref: '#/components/parameters/IdempotencyKey'
+      responses:
+        '200':
+          description: Revalidation completed
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OperationReceipt'
+        '400':
+          $ref: '#/components/responses/InvalidOperation'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+  /v1/operations/benchmark-runs/{runId}/quarantine:
+    parameters:
+      - $ref: '#/components/parameters/RunId'
+    post:
+      tags: [operations]
+      operationId: quarantineBenchmarkRun
+      summary: Quarantine evidence with an auditable reason
+      parameters:
+        - $ref: '#/components/parameters/IdempotencyKey'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/QuarantineRequest'
+      responses:
+        '200':
+          description: Quarantine state recorded
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OperationReceipt'
+        '400':
+          $ref: '#/components/responses/InvalidOperation'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+  /v1/operations/benchmark-runs/{runId}/publication-decision:
+    parameters:
+      - $ref: '#/components/parameters/RunId'
+    post:
+      tags: [operations]
+      operationId: decideBenchmarkPublication
+      summary: Record an audited publication approval or rejection
+      parameters:
+        - $ref: '#/components/parameters/IdempotencyKey'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PublicationDecisionRequest'
+      responses:
+        '200':
+          description: Publication decision recorded
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OperationReceipt'
+        '400':
+          $ref: '#/components/responses/InvalidOperation'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+components:
+  parameters:
+    RunId:
+      name: runId
+      in: path
+      required: true
+      schema:
+        type: string
+        format: uuid
+    IdempotencyKey:
+      name: Idempotency-Key
+      in: header
+      required: true
+      schema:
+        type: string
+        minLength: 8
+        maxLength: 128
+  schemas:
+    IngestReceipt:
+      type: object
+      additionalProperties: false
+      required: [runId, status]
+      properties:
+        runId:
+          type: string
+          format: uuid
+        status:
+          const: accepted
+    OperationReceipt:
+      type: object
+      additionalProperties: false
+      required: [operationId, runId, status, recordedAt]
+      properties:
+        operationId:
+          type: string
+          format: uuid
+        runId:
+          type: string
+          format: uuid
+        status:
+          enum: [validated, quarantined, publication_approved, publication_rejected]
+        recordedAt:
+          type: string
+          format: date-time
+    QuarantineRequest:
+      type: object
+      additionalProperties: false
+      required: [reason]
+      properties:
+        reason:
+          type: string
+          minLength: 3
+          maxLength: 1000
+    PublicationDecisionRequest:
+      type: object
+      additionalProperties: false
+      required: [decision, reason]
+      properties:
+        decision:
+          enum: [approve, reject]
+        reason:
+          type: string
+          minLength: 3
+          maxLength: 1000
+    Problem:
+      type: object
+      additionalProperties: true
+      required: [error]
+      properties:
+        error:
+          type: string
+        detail:
+          type: string
+        runId:
+          type: string
+          format: uuid
+  responses:
+    InvalidEvidence:
+      description: Contract or semantic validation failed
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Problem'
+    InvalidOperation:
+      description: Command path, headers, or body failed validation
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Problem'
+    Conflict:
+      description: Duplicate identifier, stale state, or idempotency conflict
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Problem'
+    NotFound:
+      description: Benchmark run was not found
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Problem'

@@ -1,0 +1,243 @@
+version: 1
+principle: "Choose Kafka Streams only when the problem requires stateful stream semantics. A Kafka dependency without a topology claim, failure model, and broker evidence is resume padding."
+scope:
+  - simple Kafka consumers
+  - Kafka Streams applications
+  - JVM services that consume or transform Kafka records
+required_decision_fields:
+  - problem_forces
+  - selected_processing_model
+  - rejected_alternatives
+  - input_and_output_topics
+  - record_key_and_partitioning
+  - serde_and_schema_evolution
+  - stream_table_and_join_semantics
+  - window_and_grace_policy
+  - state_store_and_changelog_policy
+  - processing_guarantee
+  - invalid_record_policy
+  - retry_and_dlq_policy
+  - restoration_and_rebalance_plan
+  - evidence_plan
+
+selection:
+  simple_consumer:
+    use_when:
+      - each record can be handled independently
+      - imperative offset control, batching, or integration with an existing application lifecycle is the main need
+      - no join, aggregation, window, materialized view, or local state store is required
+      - a database or external service owns the durable business state
+    prefer_over_streams_when:
+      - a topology would be a linear map or side effect with no reusable stream semantics
+      - retries require application-specific scheduling or external workflow control
+      - request or command handling matters more than replayable transformations
+    required_evidence:
+      - partition assignment and ordering test
+      - offset commit and redelivery test
+      - poison record handling test
+      - broker-backed restart test when reliability is claimed
+  kafka_streams:
+    use_when:
+      - keyed joins, aggregations, windows, tables, or materialized views are central to the problem
+      - replay must deterministically rebuild derived state
+      - partition-local state and changelog restoration are part of the reliability model
+      - topology composition is clearer than imperative polling and offset management
+    avoid_when:
+      - the application only forwards records or invokes one side effect per record
+      - there is no defensible key, state, join, aggregation, window, or replay requirement
+      - the benchmark would measure only TopologyTestDriver and present it as broker throughput
+      - Kafka is selected only to add a technology keyword
+    required_evidence:
+      - deterministic topology tests
+      - broker-backed integration tests
+      - replay and restoration test for stateful topologies
+      - rebalance test for consumer-group or availability claims
+
+record_model:
+  keys:
+    rules:
+      - select the key from the ordering, co-location, join, and aggregation invariant
+      - document null-key behavior explicitly
+      - preserve the business key across topics unless a documented topology step changes it
+      - verify partition distribution and hot-key risk with representative data
+  repartition:
+    allowed_when:
+      - a key-changing operation is required before a keyed join, aggregation, or table lookup
+    required_controls:
+      - name internal topics explicitly when operational stability matters
+      - account for extra storage, network traffic, latency, and recovery time
+      - assert output equivalence before and after repartition
+    reject_when:
+      - repartition only hides a wrong source key or an avoidable topology design
+  ordering:
+    rule: "Claim ordering only within a partition for records sharing the relevant key."
+
+serde_and_schema_evolution:
+  rules:
+    - never rely on implicit or untyped SerDes at public topic boundaries
+    - define key and value schemas independently
+    - version schemas and state compatibility mode in the technical decision
+    - test backward-compatible reads with at least the previous supported schema version
+    - keep domain validation separate from deserialization failure handling
+    - document tombstone semantics for table and compacted-topic inputs
+  acceptable_strategies:
+    - schema registry with Avro, Protobuf, or JSON Schema compatibility checks
+    - explicitly versioned JSON with contract tests when a registry is not justified
+  prohibited:
+    - silently dropping unknown fields or incompatible records
+    - changing a state-store value format without a migration or rebuild plan
+
+topology_semantics:
+  stream:
+    use_for:
+      - immutable event facts
+      - every-record transformations
+      - event-time windows and aggregations
+  table:
+    use_for:
+      - latest value per key
+      - changelog or compacted-topic semantics
+      - lookup-side data in stream-table joins
+    required_decisions:
+      - tombstone behavior
+      - source topic compaction
+      - materialization and queryability
+  global_table:
+    use_only_when:
+      - reference data is small enough to replicate to every instance
+      - avoiding co-partitioning is worth replication and restoration cost
+  joins:
+    required_decisions:
+      - join type and unmatched-record behavior
+      - co-partitioning and partition-count compatibility
+      - event-time versus processing-time interpretation
+      - duplicate and late-record effects
+  windows:
+    required_decisions:
+      - window type and size
+      - timestamp extractor and event-time source
+      - grace period justified by observed lateness
+      - retention greater than or equal to window plus grace
+      - suppression, intermediate updates, and output timing
+  state_stores:
+    required_decisions:
+      - store name and key/value types
+      - persistence versus in-memory tradeoff
+      - cache and commit interval effects
+      - changelog enabled or explicitly rejected
+      - retention, disk sizing, and cleanup policy
+      - interactive-query ownership when state is exposed
+  changelogs:
+    rules:
+      - require changelog-backed recovery for durable materialized state
+      - document rebuild-from-input only when input retention covers the full rebuild horizon
+      - measure restoration time with representative state size
+
+processing_guarantees:
+  at_least_once:
+    default: true
+    requirements:
+      - make transformations and sinks idempotent where duplicates affect business state
+      - test replay and duplicate delivery
+  exactly_once_v2:
+    use_when:
+      - atomic Kafka read-process-write semantics materially protect the topology result
+      - all relevant outputs and state updates remain inside Kafka transactions
+    requirements:
+      - configure and assert the processing guarantee explicitly
+      - test abort, restart, and duplicate input behavior against a real broker
+      - report throughput and latency cost against the same at-least-once workload
+    does_not_cover:
+      - external HTTP calls
+      - database writes outside Kafka transactions
+      - arbitrary non-transactional side effects
+  rule: "Never claim business-level exactly-once from Kafka Streams configuration alone."
+
+failure_handling:
+  invalid_records:
+    categories:
+      - deserialization_failure
+      - schema_incompatibility
+      - domain_validation_failure
+      - topology_processing_failure
+    requirements:
+      - define fail-fast, quarantine, or dead-letter behavior per category
+      - preserve source topic, partition, offset, timestamp, key, schema version, error class, and correlation id
+      - expose counters and alerts; silent skip is prohibited
+      - protect dead-letter payloads according to data sensitivity
+  retry_and_dlq:
+    rules:
+      - retry only failures classified as transient
+      - bound attempts and elapsed time
+      - avoid blocking stream threads with long backoff or unbounded remote retries
+      - preserve ordering requirements when routing to retry topics
+      - make replay from quarantine or DLQ explicit and idempotent
+      - prove poison records cannot stall healthy partitions indefinitely
+  restoration_and_rebalance:
+    requirements:
+      - test instance stop, replacement, partition reassignment, and state restoration
+      - observe restore duration, restored bytes or records, lag, and unavailable time
+      - define state directory lifecycle and persistent-volume policy
+      - choose standby replicas only from recovery objective and resource cost
+      - ensure processing resumes without lost output or duplicate business effects
+
+evidence:
+  topology_test_driver:
+    proves:
+      - deterministic record transformations
+      - key selection and output routing
+      - stream, table, join, window, and state-store semantics
+      - event-time and punctuation behavior under controlled input
+    does_not_prove:
+      - broker networking or persistence
+      - partition assignment or consumer-group rebalancing
+      - changelog restoration from a broker
+      - transaction coordinator behavior
+      - production serialization infrastructure
+      - end-to-end throughput or availability
+  real_broker:
+    required_when_claiming:
+      - Kafka or Redpanda throughput and latency
+      - replay, retention, or restoration
+      - rebalancing or horizontal scaling
+      - exactly-once-v2 behavior
+      - broker outage recovery
+    minimum_scenarios:
+      - representative multi-partition workload
+      - clean start and warmup outside measured samples
+      - instance restart and rebalance
+      - poison or incompatible record
+      - state restore or replay for stateful topologies
+      - output correctness before performance reporting
+    infrastructure_rule: "Use Testcontainers for integration tests and Docker Compose or an equivalent reproducible environment for the published benchmark."
+  benchmark:
+    required_metrics:
+      - input_records
+      - output_records
+      - invalid_records
+      - lost_records
+      - duplicate_business_effects
+      - throughput_records_per_second
+      - end_to_end_latency_p50_ms
+      - end_to_end_latency_p95_ms
+      - consumer_lag
+    stateful_metrics:
+      - restoration_time_seconds
+      - restored_records_or_bytes
+      - unavailable_time_during_rebalance_ms
+    rules:
+      - fail before reporting performance when input/output invariants do not hold
+      - separate TopologyTestDriver microbenchmarks from real-broker benchmarks
+      - compare only identical workloads, partitions, guarantees, schemas, hardware limits, and measurement windows
+      - retain raw samples, environment metadata, seed, warmup, repetitions, commit, and image digest
+
+gates:
+  no_kafka_for_resume_padding: true
+  require_rejected_simpler_alternative: true
+  require_key_and_partition_decision: true
+  require_schema_evolution_decision: true
+  require_failure_case: true
+  require_real_broker_for_broker_claims: true
+  prohibit_driver_metrics_as_broker_metrics: true
+  prohibit_silent_record_loss: true
+  prohibit_exactly_once_claim_for_external_side_effects: true

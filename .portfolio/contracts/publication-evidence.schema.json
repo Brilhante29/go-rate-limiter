@@ -1,0 +1,19 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://portfolio.local/contracts/publication-evidence.schema.json",
+  "title": "Verified GitHub publication evidence",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "repository", "commit_sha", "branch", "remote_url", "ci_conclusion", "ci_run_url", "workflow", "verified_at"],
+  "properties": {
+    "schema_version": { "const": 1 },
+    "repository": { "type": "string", "pattern": "^[a-z0-9][a-z0-9._-]*$" },
+    "commit_sha": { "type": "string", "pattern": "^[0-9a-f]{40}$" },
+    "branch": { "type": "string", "minLength": 1 },
+    "remote_url": { "type": "string", "pattern": "^https://github.com/" },
+    "ci_conclusion": { "const": "success" },
+    "ci_run_url": { "type": "string", "pattern": "^https://github.com/.+/actions/runs/[0-9]+" },
+    "workflow": { "type": "string", "minLength": 1 },
+    "verified_at": { "type": "string", "format": "date-time" }
+  }
+}
