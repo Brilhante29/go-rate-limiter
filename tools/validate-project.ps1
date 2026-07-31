@@ -255,7 +255,16 @@ if (-not $SkipDocker -and (Test-Path -LiteralPath (Join-Path $root "Dockerfile")
 }
 
 if ($failures.Count -gt 0) {
-  $failures | ForEach-Object { Write-Error $_ }
+  # Write-Error is a terminating error while $ErrorActionPreference is "Stop",
+  # so emitting the list through it aborts on the first entry and hides every
+  # remaining failure. Report the complete list on the success stream instead.
+  Write-Host "portfolio project validation failed with $($failures.Count) issue(s):"
+  foreach ($failure in $failures) {
+    Write-Host "  - $failure"
+    if ($env:GITHUB_ACTIONS -eq "true") {
+      Write-Host "::error::$failure"
+    }
+  }
   exit 1
 }
 
