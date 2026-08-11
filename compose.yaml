@@ -2,7 +2,7 @@ name: go-rate-limiter
 
 services:
   redis:
-    image: redis:8.8.0-alpine
+    image: redis:8.8.0-alpine@sha256:9d317178eceac8454a2284a9e6df2466b93c745529947f0cd42a0fa9609d7005
     command: ["redis-server", "--save", "", "--appendonly", "no"]
     healthcheck:
       test: ["CMD", "redis-cli", "ping"]
@@ -43,7 +43,7 @@ services:
         condition: service_healthy
 
   k6:
-    image: grafana/k6:2.1.0
+    image: grafana/k6:2.1.0@sha256:65c920dc067d5e2e00befbf982af6ad6ad0117034e8b1c65817c7975c52d4669
     profiles: ["load"]
     command: ["run", "/scripts/k6.js"]
     environment:

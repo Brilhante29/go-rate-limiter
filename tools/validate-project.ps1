@@ -152,7 +152,44 @@ if ($manifestResultPath -ne "") {
       $primaryResult = Get-Content -Raw -LiteralPath $primaryResultPath | ConvertFrom-Json
       $resultMetric = ""
       $resultValue = $null
-      if ($primaryResult.PSObject.Properties.Name -contains "metric") {
+      if ($primaryResult.schema_version -eq 2) {
+        $resultMetric = $manifestPrimaryMetric
+        $metricEntry = @($primaryResult.metrics | Where-Object { $_.name -eq $manifestPrimaryMetric })
+        if ($metricEntry.Count -eq 1) {
+          $resultValue = $metricEntry[0].value
+        }
+        if ($primaryResult.workload.warmup_iterations -lt 1) {
+          Add-Failure "Benchmark V2 requires at least one warmup iteration"
+        }
+        if ($primaryResult.workload.measured_iterations -lt 3) {
+          Add-Failure "Benchmark V2 requires at least three measured iterations"
+        }
+        if ($primaryResult.execution.repeat -ne $primaryResult.workload.measured_iterations) {
+          Add-Failure "Benchmark V2 repeat must equal measured_iterations"
+        }
+        foreach ($metric in @($primaryResult.metrics)) {
+          if (@($metric.samples).Count -ne $primaryResult.workload.measured_iterations) {
+            Add-Failure "Benchmark V2 metric $($metric.name) must retain one sample per measured iteration"
+          }
+          if ($metric.failures -ne 0) {
+            Add-Failure "Benchmark V2 metric $($metric.name) records failures=$($metric.failures)"
+          }
+        }
+        if ($primaryResult.provenance.clean_tree -ne $true) {
+          Add-Failure "Benchmark V2 provenance must record a clean source tree"
+        }
+        if ([string]$primaryResult.provenance.source_commit -notmatch '^[0-9a-f]{40}$') {
+          Add-Failure "Benchmark V2 source_commit must be an exact Git SHA"
+        }
+        foreach ($digestField in @("image_digest", "dependency_lock_digest", "artifact_digest")) {
+          if ([string]$primaryResult.provenance.$digestField -notmatch '^sha256:[0-9a-f]{64}$') {
+            Add-Failure "Benchmark V2 provenance.$digestField must be a sha256 digest"
+          }
+        }
+        if ([string]$primaryResult.comparability_key -notmatch '^[a-z0-9][a-z0-9._:-]*$') {
+          Add-Failure "Benchmark V2 comparability_key is invalid"
+        }
+      } elseif ($primaryResult.PSObject.Properties.Name -contains "metric") {
         $resultMetric = [string]$primaryResult.metric
         $resultValue = $primaryResult.value
       } elseif ($primaryResult.PSObject.Properties.Name -contains "primary_metric") {
@@ -164,7 +201,7 @@ if ($manifestResultPath -ne "") {
       }
 
       if ($resultMetric -eq "" -or $null -eq $resultValue) {
-        Add-Failure "Benchmark result must expose metric/value or primary_metric with its value"
+        Add-Failure "Benchmark result must expose the manifest primary metric"
       } else {
         if ($manifestPrimaryMetric -ne "" -and $resultMetric -ne $manifestPrimaryMetric) {
           Add-Failure "Benchmark metric mismatch: project.yaml=$manifestPrimaryMetric result=$resultMetric"

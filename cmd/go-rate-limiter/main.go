@@ -126,24 +126,41 @@ func runServe(args []string) error {
 func runBenchmark(args []string) error {
 	flags := flag.NewFlagSet("benchmark", flag.ContinueOnError)
 	targetsRaw := flags.String("targets", "http://127.0.0.1:8081,http://127.0.0.1:8082", "comma-separated node URLs")
-	duration := flags.Duration("duration", 10*time.Second, "benchmark duration")
+	duration := flags.Duration("duration", 5*time.Second, "measured iteration duration")
+	warmupDuration := flags.Duration("warmup-duration", time.Second, "warmup iteration duration")
 	concurrency := flags.Int("concurrency", 64, "parallel workers")
+	warmupIterations := flags.Int("warmup-iterations", 1, "warmup iterations")
+	measuredIterations := flags.Int("measured-iterations", 3, "measured iterations")
 	key := flags.String("key", "benchmark-shared", "shared rate-limit key")
 	rate := flags.Float64("rate", 1_000, "configured token rate")
 	burst := flags.Int64("burst", 1_000, "configured burst")
 	output := flags.String("output", "benchmarks/results/rate-limiter-baseline.json", "result JSON path")
 	command := flags.String("command", dockerBenchmarkCommand, "reproduction command recorded in JSON")
+	provenance := addProvenanceFlags(flags)
 	if err := flags.Parse(args); err != nil {
 		return err
 	}
 	result, benchmarkErr := loadbench.Run(context.Background(), loadbench.Config{
-		Targets:     splitTargets(*targetsRaw),
-		Duration:    *duration,
-		Concurrency: *concurrency,
-		Key:         *key,
-		Rate:        *rate,
-		Burst:       *burst,
-		Command:     *command,
+		Targets:              splitTargets(*targetsRaw),
+		Duration:             *duration,
+		WarmupDuration:       *warmupDuration,
+		Concurrency:          *concurrency,
+		WarmupIterations:     *warmupIterations,
+		MeasuredIterations:   *measuredIterations,
+		Key:                  *key,
+		Rate:                 *rate,
+		Burst:                *burst,
+		Command:              *command,
+		FixtureDigest:        *provenance.fixtureDigest,
+		SourceCommit:         *provenance.sourceCommit,
+		CleanTree:            *provenance.cleanTree,
+		ImageRef:             *provenance.imageRef,
+		ImageDigest:          *provenance.imageDigest,
+		DependencyLockDigest: *provenance.dependencyLockDigest,
+		Producer:             *provenance.producer,
+		ArtifactDigest:       *provenance.artifactDigest,
+		HardwareClass:        *provenance.hardwareClass,
+		RedisVersion:         *provenance.redisVersion,
 	})
 	if result.Project != "" {
 		if err := loadbench.Write(*output, result); err != nil {
@@ -160,21 +177,38 @@ func runDemo(args []string) error {
 	flags := flag.NewFlagSet("demo", flag.ContinueOnError)
 	redisBinary := flags.String("redis-binary", "redis-server", "redis-server executable")
 	output := flags.String("output", "/tmp/rate-limiter-baseline.json", "result JSON path")
-	duration := flags.Duration("duration", 10*time.Second, "benchmark duration")
+	duration := flags.Duration("duration", 5*time.Second, "measured iteration duration")
+	warmupDuration := flags.Duration("warmup-duration", time.Second, "warmup iteration duration")
 	concurrency := flags.Int("concurrency", 64, "parallel workers")
+	warmupIterations := flags.Int("warmup-iterations", 1, "warmup iterations")
+	measuredIterations := flags.Int("measured-iterations", 3, "measured iterations")
 	rate := flags.Float64("rate", 1_000, "global token rate")
 	burst := flags.Int64("burst", 1_000, "global burst")
+	provenance := addProvenanceFlags(flags)
 	if err := flags.Parse(args); err != nil {
 		return err
 	}
 	result, err := demo.Run(context.Background(), demo.Config{
-		RedisBinary: *redisBinary,
-		Output:      *output,
-		Duration:    *duration,
-		Concurrency: *concurrency,
-		Rate:        *rate,
-		Burst:       *burst,
-		Command:     dockerBenchmarkCommand,
+		RedisBinary:         *redisBinary,
+		Output:              *output,
+		Duration:            *duration,
+		WarmupDuration:      *warmupDuration,
+		Concurrency:         *concurrency,
+		WarmupIterations:    *warmupIterations,
+		MeasuredIterations:  *measuredIterations,
+		Rate:                *rate,
+		Burst:               *burst,
+		Command:             dockerBenchmarkCommand,
+		FixtureDigest:       *provenance.fixtureDigest,
+		SourceCommit:        *provenance.sourceCommit,
+		CleanTree:           *provenance.cleanTree,
+		ImageRef:            *provenance.imageRef,
+		ImageDigest:         *provenance.imageDigest,
+		DependencyLockDigest: *provenance.dependencyLockDigest,
+		Producer:            *provenance.producer,
+		ArtifactDigest:      *provenance.artifactDigest,
+		HardwareClass:       *provenance.hardwareClass,
+		RedisVersion:        *provenance.redisVersion,
 	})
 	if result.Project != "" {
 		if printErr := printResult(result); printErr != nil {
@@ -182,6 +216,34 @@ func runDemo(args []string) error {
 		}
 	}
 	return err
+}
+
+type provenanceFlags struct {
+	fixtureDigest        *string
+	sourceCommit         *string
+	cleanTree            *bool
+	imageRef             *string
+	imageDigest          *string
+	dependencyLockDigest *string
+	producer             *string
+	artifactDigest       *string
+	hardwareClass        *string
+	redisVersion         *string
+}
+
+func addProvenanceFlags(flags *flag.FlagSet) provenanceFlags {
+	return provenanceFlags{
+		fixtureDigest:        flags.String("fixture-digest", "", "sha256 digest of the workload fixture"),
+		sourceCommit:         flags.String("source-commit", "", "exact source Git commit"),
+		cleanTree:            flags.Bool("clean-tree", false, "source tree was clean before the image build"),
+		imageRef:             flags.String("image-ref", "go-rate-limiter:local", "measured image reference"),
+		imageDigest:          flags.String("image-digest", "", "measured image sha256 digest"),
+		dependencyLockDigest: flags.String("dependency-lock-digest", "", "go.sum sha256 digest"),
+		producer:             flags.String("producer", "local", "local, github-actions, or other-ci"),
+		artifactDigest:       flags.String("artifact-digest", "", "benchmark binary sha256 digest"),
+		hardwareClass:        flags.String("hardware-class", "", "stable benchmark hardware class"),
+		redisVersion:         flags.String("redis-version", "8.8.0", "Redis version under test"),
+	}
 }
 
 func splitTargets(raw string) []string {

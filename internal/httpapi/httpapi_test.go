@@ -2,6 +2,7 @@ package httpapi
 
 import (
 	"context"
+	"errors"
 	"net/http"
 	"net/http/httptest"
 	"strings"
@@ -71,5 +72,20 @@ func TestCheckRejectsInvalidInput(t *testing.T) {
 				t.Fatalf("status=%d body=%s", response.Code, response.Body.String())
 			}
 		})
+	}
+}
+
+func TestCheckFailsClosedWhenStoreIsUnavailable(t *testing.T) {
+	service, _ := limiter.NewService(stubStore{err: errors.New("Redis unavailable")}, limiter.Policy{RatePerSecond: 10, Burst: 10})
+	handler := New(service, nil, "node-a", "redis").Handler()
+	request := httptest.NewRequest(http.MethodPost, "/v1/limits/shared/check", nil)
+	response := httptest.NewRecorder()
+	handler.ServeHTTP(response, request)
+
+	if response.Code != http.StatusServiceUnavailable {
+		t.Fatalf("status=%d body=%s", response.Code, response.Body.String())
+	}
+	if strings.Contains(response.Body.String(), "Redis unavailable") {
+		t.Fatal("internal store error leaked in the HTTP response")
 	}
 }

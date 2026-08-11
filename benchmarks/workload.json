@@ -1,0 +1,12 @@
+{
+  "version": "token-bucket-http-v2",
+  "algorithm": "token_bucket",
+  "store": "redis-8.8.0",
+  "http_nodes": 2,
+  "shared_keys_per_iteration": 1,
+  "key_isolation": "unique-key-per-warmup-and-measured-iteration",
+  "request_cost": 1,
+  "accepted_status": 200,
+  "rejected_status": 429,
+  "failure_status": 503
+}

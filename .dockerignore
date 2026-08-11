@@ -1,9 +1,5 @@
 .git
 .github
-.claude
-.codex
 .portfolio
-benchmarks/results/*.json
-openspec/artifacts
-README.md
-sdd
+.portfolio-control
+benchmarks/results

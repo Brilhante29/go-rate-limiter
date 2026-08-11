@@ -17,13 +17,26 @@ import (
 )
 
 type Config struct {
-	RedisBinary string
-	Output      string
-	Duration    time.Duration
-	Concurrency int
-	Rate        float64
-	Burst       int64
-	Command     string
+	RedisBinary         string
+	Output              string
+	Duration            time.Duration
+	WarmupDuration      time.Duration
+	Concurrency         int
+	WarmupIterations    int
+	MeasuredIterations  int
+	Rate                float64
+	Burst               int64
+	Command             string
+	FixtureDigest       string
+	SourceCommit        string
+	CleanTree           bool
+	ImageRef            string
+	ImageDigest         string
+	DependencyLockDigest string
+	Producer            string
+	ArtifactDigest      string
+	HardwareClass       string
+	RedisVersion        string
 }
 
 func Run(ctx context.Context, config Config) (loadbench.Result, error) {
@@ -88,12 +101,25 @@ func Run(ctx context.Context, config Config) (loadbench.Result, error) {
 			"http://" + listenerA.Addr().String(),
 			"http://" + listenerB.Addr().String(),
 		},
-		Duration:    config.Duration,
-		Concurrency: config.Concurrency,
-		Key:         benchmarkKey,
-		Rate:        config.Rate,
-		Burst:       config.Burst,
-		Command:     config.Command,
+		Duration:             config.Duration,
+		WarmupDuration:       config.WarmupDuration,
+		Concurrency:          config.Concurrency,
+		WarmupIterations:     config.WarmupIterations,
+		MeasuredIterations:   config.MeasuredIterations,
+		Key:                  benchmarkKey,
+		Rate:                 config.Rate,
+		Burst:                config.Burst,
+		Command:              config.Command,
+		FixtureDigest:        config.FixtureDigest,
+		SourceCommit:         config.SourceCommit,
+		CleanTree:            config.CleanTree,
+		ImageRef:             config.ImageRef,
+		ImageDigest:          config.ImageDigest,
+		DependencyLockDigest: config.DependencyLockDigest,
+		Producer:             config.Producer,
+		ArtifactDigest:       config.ArtifactDigest,
+		HardwareClass:        config.HardwareClass,
+		RedisVersion:         config.RedisVersion,
 	})
 
 	select {

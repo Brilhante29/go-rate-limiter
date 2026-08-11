@@ -12,6 +12,18 @@ jobs:
   validate:
     runs-on: ubuntu-latest
     timeout-minutes: 15
+    services:
+      redis:
+        image: redis:8.8.0-alpine@sha256:9d317178eceac8454a2284a9e6df2466b93c745529947f0cd42a0fa9609d7005
+        ports:
+          - 6379:6379
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 1s
+          --health-timeout 1s
+          --health-retries 20
+    env:
+      REDIS_TEST_ADDR: 127.0.0.1:6379
     steps:
       - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
       - uses: actions/setup-go@924ae3a1cded613372ab5595356fb5720e22ba16 # v6.0.0
@@ -29,7 +41,7 @@ jobs:
       - name: Build self-contained image
         run: docker build -t go-rate-limiter .
       - name: Verify distributed Docker demo
-        run: docker run --rm go-rate-limiter demo --duration 1s --concurrency 16 --rate 200 --burst 200 --output /tmp/result.json
+        run: docker run --rm go-rate-limiter demo --duration 1s --warmup-duration 250ms --warmup-iterations 1 --measured-iterations 3 --concurrency 16 --rate 200 --burst 200 --output /tmp/result.json
       - name: Validate portfolio contract
         shell: pwsh
         run: ./tools/validate-project.ps1 -SkipDocker
