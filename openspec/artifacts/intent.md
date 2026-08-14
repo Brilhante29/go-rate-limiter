@@ -29,5 +29,5 @@ Provides the shared traffic-control primitive used by gateways and multi-tenant 
 
 ## Public Proof
 
-- Benchmark: total_rps = 11511.03 requests_per_second
+- Benchmark: total_rps = 5543.34 requests_per_second (median of three runs)
 - Result path: `benchmarks/results/rate-limiter-baseline.json`

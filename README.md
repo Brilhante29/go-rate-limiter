@@ -1,8 +1,8 @@
-# #12 go-rate-limiter: 11,511.03 req/s at 11.985 ms p95
+# #12 go-rate-limiter: 5,543.34 req/s at 28.290 ms p95
 
 **Claim:** two HTTP nodes enforce one global token-bucket quota through atomic Redis state.
 
-**Benchmark:** `11,511.03 req/s` total, `1,083.62 req/s` accepted, `10,427.40 req/s` rejected, and `11.985 ms` p95 across two nodes, with zero errors and the global quota preserved.
+**Benchmark:** median `5,543.34 req/s` total, `1,197.66 req/s` accepted, `4,347.93 req/s` rejected, and `28.290 ms` p95 across two nodes, with zero errors and zero global-limit violations in three runs.
 
 [![CI](https://github.com/Brilhante29/go-rate-limiter/actions/workflows/ci.yml/badge.svg)](https://github.com/Brilhante29/go-rate-limiter/actions/workflows/ci.yml)
 
@@ -31,14 +31,14 @@ pwsh -NoProfile -File tools/benchmark.ps1
 
 | Metric | Value | Meaning |
 |---|---:|---|
-| accepted_rps | 1,083.62 | Requests admitted by the configured global quota |
-| rejected_rps | 10,427.40 | Excess requests rejected with HTTP 429 |
-| total_rps | 11,511.03 | Aggregate load handled by both nodes |
-| p95_latency_ms | 11.985 | End-to-end decision latency |
+| accepted_rps | 1,197.66 | Median requests admitted by the configured global quota |
+| rejected_rps | 4,347.93 | Median excess requests rejected with HTTP 429 |
+| total_rps | 5,543.34 | Median aggregate load handled by both nodes |
+| p95_latency_ms | 28.290 | Median end-to-end p95 decision latency |
 | nodes_observed | 2 | Proof that traffic reached both nodes |
-| global_limit_preserved | true | Accepted count stayed below burst + refill |
+| global_limit_violations | 0 | Accepted count stayed below burst + refill in every run |
 
-Baseline: 115,129 decisions in 10.002 seconds on Docker Linux/amd64 with 16 CPUs, Go 1.26.5, and Redis 8.8.0; 10,838 accepted, 104,291 rejected, zero errors. A confirmation run reached 11,146.16 req/s at 12.096 ms p95 (3.2% throughput variance). Measured on 2026-07-15.
+Workload: one warm-up followed by three 5-second runs at concurrency 64, 1,000 tokens/s and burst 1,000. Measured on Docker Linux/amd64 with 6 CPUs, Go 1.26.5, Redis 8.8.0, and two independently addressed HTTP nodes on 2026-08-14. Throughput samples were 5,404.27, 6,473.98, and 5,543.34 req/s.
 
 Result: `benchmarks/results/rate-limiter-baseline.json`.
 

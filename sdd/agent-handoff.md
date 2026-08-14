@@ -23,7 +23,7 @@ Project: `12 - go-rate-limiter`
 | language-profile-agent | `cmd`, `internal`, colocated tests, race/vet/bench gates | repository layout and CI | complete |
 | benchmark-harness-agent | Two-node correctness-aware Go runner plus k6 profile | `internal/loadbench`, `benchmarks/k6.js` | complete |
 | security-reuse-reviewer | bounded input, fail closed, no secrets, attributed references | API, code, `REFERENCES.md` | complete |
-| release-ci-publisher | Published repository and verified the complete GitHub Actions pipeline | workflow and release checklist | complete |
+| release-ci-publisher | Final V2 evidence is ready; exact-head GitHub Actions remains the publication gate | workflow and release checklist | pending remote CI |
 
 ## Architecture Boundaries
 
@@ -36,8 +36,8 @@ Project: `12 - go-rate-limiter`
 ## Benchmark Handoff
 
 - Primary metric: total_rps.
-- Companion metrics: accepted_rps, rejected_rps, p95_latency_ms, nodes_observed, errors, and global_limit_preserved.
-- Correctness gate: `global_limit_preserved=true`.
+- Companion metrics: accepted_rps, rejected_rps, p95_latency_ms, nodes_observed, unexpected_errors, and global_limit_violations.
+- Correctness gate: `nodes_observed=2`, `unexpected_errors=0`, and `global_limit_violations=0` in every repetition.
 - Result: `benchmarks/results/rate-limiter-baseline.json`.
 - Fixture: one shared key, two nodes, one Redis instance, cost one.
 
@@ -54,4 +54,4 @@ Project: `12 - go-rate-limiter`
 - [x] Architecture, API, references, and reuse review are complete.
 - [x] No secret or paid service is required.
 - [x] Project validation passes.
-- [x] GitHub CI passes on the published commit.
+- [ ] GitHub CI passes on the exact final published commit.

@@ -32,9 +32,9 @@ docker run --rm go-rate-limiter
 | cost per request | 1 token |
 | rate | 1,000 tokens/s |
 | burst | 1,000 tokens |
-| duration | 10 s |
+| duration | 5 s per repetition |
 | concurrency | 64 workers |
-| benchmark repetitions | 1 committed baseline; rerun for comparison |
+| benchmark repetitions | 3 after one warm-up |
 
 ## Metrics
 
@@ -64,14 +64,14 @@ The README number must be copied from that file after reproduction; manually inv
 
 | Metric | Result |
 |---|---:|
-| accepted_rps | 1,083.62 |
-| rejected_rps | 10,427.40 |
-| total_rps | 11,511.03 |
-| p95_latency_ms | 11.985 |
+| accepted_rps | 1,197.66 median |
+| rejected_rps | 4,347.93 median |
+| total_rps | 5,543.34 median |
+| p95_latency_ms | 28.290 median |
 | nodes_observed | 2 |
 | errors | 0 |
-| global_limit_preserved | true |
+| global_limit_violations | 0 |
 
-The committed run completed 115,129 decisions in 10.002 seconds on Docker Linux/amd64 with 16 CPUs, Go 1.26.5, and Redis 8.8.0. A second non-writing confirmation reached 11,146.16 req/s at 12.096 ms p95, a 3.2% throughput difference. The independent k6 topology also passed all thresholds at 6,897.03 HTTP req/s and 8.44 ms p95.
+The three measured throughput samples were 5,404.27, 6,473.98, and 5,543.34 req/s. Every repetition observed both HTTP nodes and recorded zero unexpected errors and zero global-limit violations.
 
-Measured on 2026-07-15.
+Measured on 2026-08-14 with Docker Linux/amd64, 6 CPUs, Go 1.26.5, and Redis 8.8.0.

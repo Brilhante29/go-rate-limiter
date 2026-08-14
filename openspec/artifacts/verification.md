@@ -16,7 +16,7 @@
 ## Checks
 
 - Component pack selected: `backend-reliability-platform`
-- Benchmark line: total_rps = 11511.03 requests_per_second
+- Benchmark line: total_rps = 5543.34 requests_per_second (median of three runs)
 - Voice verdict: aligned
 
 ## Remaining Risk

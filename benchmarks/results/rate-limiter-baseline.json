@@ -1,35 +1,170 @@
 {
+  "schema_version": 2,
+  "run_id": "cc1073a5-262e-44b9-b9fa-190596a0de9d",
   "project": "go-rate-limiter",
-  "metric": "total_rps",
-  "value": 11511.03,
-  "unit": "requests_per_second",
-  "timestamp": "2026-07-15T16:46:01Z",
-  "command": "docker run --rm go-rate-limiter",
-  "repeat": 1,
-  "summary": {
-    "accepted_rps": 1083.62,
-    "max_expected_accepted": 11003,
-    "nodes_observed": 2,
-    "p95_latency_ms": 11.985,
-    "rejected_rps": 10427.4,
-    "total_rps": 11511.03
+  "benchmark_id": "shared-token-bucket",
+  "workload": {
+    "version": "token-bucket-http-v2",
+    "fixture_digest": "sha256:1a850d7fecd41a819cd8b0dd8917301c8daa38befc3259d0887bde3fe6004e46",
+    "config_digest": "sha256:9ec40b216f16fc2aba9f3035cace979a33e0424df478a27ecf4c0287b740156f",
+    "warmup_iterations": 1,
+    "measured_iterations": 3,
+    "concurrency": 64
+  },
+  "metrics": [
+    {
+      "name": "total_rps",
+      "value": 5543.34,
+      "unit": "requests_per_second",
+      "direction": "higher_is_better",
+      "samples": [
+        5404.27,
+        6473.98,
+        5543.34
+      ],
+      "failures": 0,
+      "summary": {
+        "max": 6473.98,
+        "mean": 5807.197,
+        "median": 5543.34,
+        "min": 5404.27
+      }
+    },
+    {
+      "name": "accepted_rps",
+      "value": 1197.66,
+      "unit": "requests_per_second",
+      "direction": "target",
+      "samples": [
+        1197.66,
+        1198.23,
+        1195.41
+      ],
+      "failures": 0,
+      "summary": {
+        "max": 1198.23,
+        "mean": 1197.1,
+        "median": 1197.66,
+        "min": 1195.41
+      }
+    },
+    {
+      "name": "rejected_rps",
+      "value": 4347.93,
+      "unit": "requests_per_second",
+      "direction": "target",
+      "samples": [
+        4206.61,
+        5275.76,
+        4347.93
+      ],
+      "failures": 0,
+      "summary": {
+        "max": 5275.76,
+        "mean": 4610.1,
+        "median": 4347.93,
+        "min": 4206.61
+      }
+    },
+    {
+      "name": "p95_latency_ms",
+      "value": 28.29,
+      "unit": "milliseconds",
+      "direction": "lower_is_better",
+      "samples": [
+        33.451,
+        25.046,
+        28.29
+      ],
+      "failures": 0,
+      "summary": {
+        "max": 33.451,
+        "mean": 28.929,
+        "median": 28.29,
+        "min": 25.046
+      }
+    },
+    {
+      "name": "nodes_observed",
+      "value": 2,
+      "unit": "count",
+      "direction": "target",
+      "samples": [
+        2,
+        2,
+        2
+      ],
+      "failures": 0,
+      "summary": {
+        "max": 2,
+        "mean": 2,
+        "median": 2,
+        "min": 2
+      }
+    },
+    {
+      "name": "unexpected_errors",
+      "value": 0,
+      "unit": "count",
+      "direction": "target",
+      "samples": [
+        0,
+        0,
+        0
+      ],
+      "failures": 0,
+      "summary": {
+        "max": 0,
+        "mean": 0,
+        "median": 0,
+        "min": 0
+      }
+    },
+    {
+      "name": "global_limit_violations",
+      "value": 0,
+      "unit": "count",
+      "direction": "target",
+      "samples": [
+        0,
+        0,
+        0
+      ],
+      "failures": 0,
+      "summary": {
+        "max": 0,
+        "mean": 0,
+        "median": 0,
+        "min": 0
+      }
+    }
+  ],
+  "execution": {
+    "command": "docker run --rm go-rate-limiter",
+    "started_at": "2026-08-14T03:58:29Z",
+    "duration_seconds": 16.05,
+    "exit_code": 0,
+    "repeat": 3
   },
   "environment": {
-    "arch": "amd64",
-    "cpus": "16",
-    "go": "go1.26.5",
+    "runtime": "go1.26.5",
+    "architecture": "amd64",
+    "hardware_class": "local-docker",
     "os": "linux",
-    "store": "redis"
+    "cpu_count": "6",
+    "store": "redis",
+    "redis_version": "8.8.0",
+    "http_nodes": "2",
+    "topology": "two-http-processes-one-redis-process"
   },
-  "duration_seconds": 10.002,
-  "concurrency": 64,
-  "total_requests": 115129,
-  "accepted": 10838,
-  "rejected": 104291,
-  "errors": 0,
-  "nodes": [
-    "node-a",
-    "node-b"
-  ],
-  "global_limit_preserved": true
+  "provenance": {
+    "source_commit": "d40fde0c21487accda73cf8a0a96479f027b25be",
+    "clean_tree": true,
+    "image_ref": "go-rate-limiter",
+    "image_digest": "sha256:6fa8f4ffa9dc7229fb784437ed608eaa08549faf2a49df07d662c1fcd00af071",
+    "dependency_lock_digest": "sha256:2ee4aa8ac3f95c011d677f8e3fa88e35f95ff380cd729386011c344da2789bbb",
+    "producer": "local",
+    "artifact_digest": "sha256:41be8ea440ac039515ac52cabf85f520b719070491eea576b54f89d2d05d8888"
+  },
+  "comparability_key": "go-rate-limiter:token-bucket-http-v2:redis-8_8_0:nodes-2:rate-1000:burst-1000:duration-5000ms:concurrency-64"
 }
