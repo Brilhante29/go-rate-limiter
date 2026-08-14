@@ -58,6 +58,33 @@ $requiredFiles = @(
 )
 foreach ($file in $requiredFiles) { Require-File $file }
 
+$benchmarkScriptPath = Join-Path $root "tools/benchmark.ps1"
+if (Test-Path -LiteralPath $benchmarkScriptPath -PathType Leaf) {
+  $benchmarkScript = Get-Content -Raw -LiteralPath $benchmarkScriptPath
+  foreach ($pattern in @(
+    'Get-Variable IsLinux',
+    '& id -u',
+    '& id -g',
+    '@\("--user", "\$\{hostUid\}:\$\{hostGid\}"\)',
+    '\$env:GITHUB_ACTIONS',
+    '"github-actions"'
+  )) {
+    if ($benchmarkScript -notmatch $pattern) {
+      Add-Failure "Benchmark runner is missing Linux bind-mount ownership/provenance guard: $pattern"
+    }
+  }
+}
+
+$ciWorkflowPath = Join-Path $root ".github/workflows/ci.yml"
+if (Test-Path -LiteralPath $ciWorkflowPath -PathType Leaf) {
+  $ciWorkflow = Get-Content -Raw -LiteralPath $ciWorkflowPath
+  foreach ($literal in @('$env:RUNNER_TEMP/rate-limiter-ci.json', 'actions/upload-artifact@', '${{ runner.temp }}/rate-limiter-ci.json')) {
+    if (-not $ciWorkflow.Contains($literal)) {
+      Add-Failure "CI workflow is missing isolated smoke evidence handling: $literal"
+    }
+  }
+}
+
 $manifestPath = Join-Path $root "project.yaml"
 $manifestPrimaryMetric = ""
 $manifestResultPath = ""

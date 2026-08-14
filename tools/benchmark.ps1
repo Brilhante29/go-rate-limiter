@@ -63,30 +63,45 @@ try {
   docker compose -p $composeProject up -d --wait redis node-a node-b
   if ($LASTEXITCODE -ne 0) { throw "Docker topology failed to become healthy" }
 
-  docker run --rm `
-    --network "${composeProject}_default" `
-    --mount "type=bind,source=$resolvedResultDirectory,target=/results" `
-    $Image `
-    benchmark `
-    --targets "http://node-a:8080,http://node-b:8080" `
-    --duration "${DurationSeconds}s" `
-    --warmup-duration "${WarmupSeconds}s" `
-    --warmup-iterations 1 `
-    --measured-iterations $Repetitions `
-    --concurrency $Concurrency `
-    --rate $RatePerSecond `
-    --burst $Burst `
-    --fixture-digest $fixtureDigest `
-    --source-commit $sourceCommit `
-    --clean-tree=true `
-    --image-ref $Image `
-    --image-digest $imageDigest `
-    --dependency-lock-digest $dependencyLockDigest `
-    --producer local `
-    --artifact-digest $artifactDigest `
-    --hardware-class $HardwareClass `
-    --redis-version 8.8.0 `
-    --output "/results/$resultFileName"
+  $dockerArgs = @(
+    "run", "--rm",
+    "--network", "${composeProject}_default",
+    "--mount", "type=bind,source=$resolvedResultDirectory,target=/results"
+  )
+  $isLinuxHost = [bool](Get-Variable IsLinux -ValueOnly -ErrorAction SilentlyContinue)
+  if ($isLinuxHost) {
+    $hostUid = (& id -u).Trim()
+    if ($LASTEXITCODE -ne 0 -or $hostUid -notmatch '^\d+$') { throw "Cannot resolve Linux host UID" }
+    $hostGid = (& id -g).Trim()
+    if ($LASTEXITCODE -ne 0 -or $hostGid -notmatch '^\d+$') { throw "Cannot resolve Linux host GID" }
+    $dockerArgs += @("--user", "${hostUid}:${hostGid}")
+  }
+
+  $producer = if ($env:GITHUB_ACTIONS -eq "true") { "github-actions" } else { "local" }
+  $dockerArgs += @(
+    $Image,
+    "benchmark",
+    "--targets", "http://node-a:8080,http://node-b:8080",
+    "--duration", "${DurationSeconds}s",
+    "--warmup-duration", "${WarmupSeconds}s",
+    "--warmup-iterations", "1",
+    "--measured-iterations", "$Repetitions",
+    "--concurrency", "$Concurrency",
+    "--rate", "$RatePerSecond",
+    "--burst", "$Burst",
+    "--fixture-digest", $fixtureDigest,
+    "--source-commit", $sourceCommit,
+    "--clean-tree=true",
+    "--image-ref", $Image,
+    "--image-digest", $imageDigest,
+    "--dependency-lock-digest", $dependencyLockDigest,
+    "--producer", $producer,
+    "--artifact-digest", $artifactDigest,
+    "--hardware-class", $HardwareClass,
+    "--redis-version", "8.8.0",
+    "--output", "/results/$resultFileName"
+  )
+  docker @dockerArgs
   if ($LASTEXITCODE -ne 0) { throw "Docker benchmark failed" }
 } finally {
   docker compose -p $composeProject down --volumes --remove-orphans

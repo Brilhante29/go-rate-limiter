@@ -41,6 +41,12 @@ jobs:
       - name: Verify two-node Docker benchmark
         shell: pwsh
         run: ./tools/benchmark.ps1 -DurationSeconds 1 -WarmupSeconds 1 -Repetitions 3 -Concurrency 16 -RatePerSecond 200 -Burst 200 -HardwareClass github-actions-linux -OutputPath "$env:RUNNER_TEMP/rate-limiter-ci.json"
+      - name: Upload CI smoke evidence
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: rate-limiter-ci-${{ github.sha }}
+          path: ${{ runner.temp }}/rate-limiter-ci.json
+          if-no-files-found: error
       - name: Validate portfolio contract
         shell: pwsh
         run: ./tools/validate-project.ps1 -SkipDocker
