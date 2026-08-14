@@ -38,10 +38,9 @@ jobs:
         run: go vet ./...
       - name: Allocation benchmark
         run: go test -run '^$' -bench BenchmarkMemoryStoreTake -benchmem ./internal/limiter
-      - name: Build self-contained image
-        run: docker build -t go-rate-limiter .
-      - name: Verify distributed Docker demo
-        run: docker run --rm go-rate-limiter demo --duration 1s --warmup-duration 250ms --warmup-iterations 1 --measured-iterations 3 --concurrency 16 --rate 200 --burst 200 --output /tmp/result.json
+      - name: Verify two-node Docker benchmark
+        shell: pwsh
+        run: ./tools/benchmark.ps1 -DurationSeconds 1 -WarmupSeconds 1 -Repetitions 3 -Concurrency 16 -RatePerSecond 200 -Burst 200 -HardwareClass github-actions-linux -OutputPath "$env:RUNNER_TEMP/rate-limiter-ci.json"
       - name: Validate portfolio contract
         shell: pwsh
         run: ./tools/validate-project.ps1 -SkipDocker

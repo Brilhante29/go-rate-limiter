@@ -17,26 +17,26 @@ import (
 )
 
 type Config struct {
-	RedisBinary         string
-	Output              string
-	Duration            time.Duration
-	WarmupDuration      time.Duration
-	Concurrency         int
-	WarmupIterations    int
-	MeasuredIterations  int
-	Rate                float64
-	Burst               int64
-	Command             string
-	FixtureDigest       string
-	SourceCommit        string
-	CleanTree           bool
-	ImageRef            string
-	ImageDigest         string
+	RedisBinary          string
+	Output               string
+	Duration             time.Duration
+	WarmupDuration       time.Duration
+	Concurrency          int
+	WarmupIterations     int
+	MeasuredIterations   int
+	Rate                 float64
+	Burst                int64
+	Command              string
+	FixtureDigest        string
+	SourceCommit         string
+	CleanTree            bool
+	ImageRef             string
+	ImageDigest          string
 	DependencyLockDigest string
-	Producer            string
-	ArtifactDigest      string
-	HardwareClass       string
-	RedisVersion        string
+	Producer             string
+	ArtifactDigest       string
+	HardwareClass        string
+	RedisVersion         string
 }
 
 func Run(ctx context.Context, config Config) (loadbench.Result, error) {

@@ -11,33 +11,45 @@ services:
       retries: 20
 
   node-a:
+    image: ${RATE_LIMITER_IMAGE:-go-rate-limiter}
     build:
       context: .
-      target: app
+      target: demo
     command: ["serve"]
     environment:
       NODE_ID: node-a
       REDIS_ADDR: redis:6379
-      RATE_PER_SECOND: "1000"
-      BURST: "1000"
+      RATE_PER_SECOND: "${RATE_PER_SECOND:-1000}"
+      BURST: "${BURST:-1000}"
     ports:
-      - "8081:8080"
+      - "${NODE_A_PORT:-8081}:8080"
+    healthcheck:
+      test: ["CMD", "wget", "-q", "-O", "-", "http://127.0.0.1:8080/healthz"]
+      interval: 1s
+      timeout: 1s
+      retries: 20
     depends_on:
       redis:
         condition: service_healthy
 
   node-b:
+    image: ${RATE_LIMITER_IMAGE:-go-rate-limiter}
     build:
       context: .
-      target: app
+      target: demo
     command: ["serve"]
     environment:
       NODE_ID: node-b
       REDIS_ADDR: redis:6379
-      RATE_PER_SECOND: "1000"
-      BURST: "1000"
+      RATE_PER_SECOND: "${RATE_PER_SECOND:-1000}"
+      BURST: "${BURST:-1000}"
     ports:
-      - "8082:8080"
+      - "${NODE_B_PORT:-8082}:8080"
+    healthcheck:
+      test: ["CMD", "wget", "-q", "-O", "-", "http://127.0.0.1:8080/healthz"]
+      interval: 1s
+      timeout: 1s
+      retries: 20
     depends_on:
       redis:
         condition: service_healthy

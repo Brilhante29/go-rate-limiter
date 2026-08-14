@@ -50,13 +50,13 @@ type Config struct {
 }
 
 type Metric struct {
-	Name       string             `json:"name"`
-	Value      float64            `json:"value"`
-	Unit       string             `json:"unit"`
-	Direction  string             `json:"direction"`
-	Samples    []float64          `json:"samples"`
-	Failures   int                `json:"failures"`
-	Summary    map[string]float64 `json:"summary"`
+	Name      string             `json:"name"`
+	Value     float64            `json:"value"`
+	Unit      string             `json:"unit"`
+	Direction string             `json:"direction"`
+	Samples   []float64          `json:"samples"`
+	Failures  int                `json:"failures"`
+	Summary   map[string]float64 `json:"summary"`
 }
 
 type Workload struct {
