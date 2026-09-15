@@ -1,11 +1,9 @@
 {
   "disposition": "documented",
-  "fixable": 8,
-  "fixable_packages": {
-    "stdlib": 8
-  },
-  "generated_at": "2026-08-21T14:13:48.997443Z",
-  "high_critical_total": 8,
+  "fixable": 0,
+  "fixable_packages": {},
+  "generated_at": "2026-09-15T03:25:13.130749Z",
+  "high_critical_total": 0,
   "image": "go-rate-limiter:sec",
   "no_upstream_fix": 0,
   "rationale": "Base images are pinned by digest so benchmark provenance stays comparable. Rebuilding does not clear these advisories: the current upstream digest carries the same set. Applying apt-get upgrade would make the image non-deterministic and change image_digest between builds of the same commit, breaking the V2 comparability contract.",
