@@ -1,0 +1,26 @@
+kit_version: "portfolio-reuse-kit@993c2bac94ccad0b4c06c7dca05eea2b2cca4e19"
+
+consumed:
+  - source: "templates/CLAUDE.md"
+    version: "993c2bac94ccad0b4c06c7dca05eea2b2cca4e19"
+    files: ["CLAUDE.md"]
+  - source: ".editorconfig"
+    version: "993c2bac94ccad0b4c06c7dca05eea2b2cca4e19"
+    files: [".editorconfig"]
+  - source: ".gitattributes"
+    version: "993c2bac94ccad0b4c06c7dca05eea2b2cca4e19"
+    files: [".gitattributes"]
+  - source: "kit snapshot (49 files)"
+    version: "993c2bac94ccad0b4c06c7dca05eea2b2cca4e19"
+    files: [".portfolio/"]
+
+local_overrides:
+  - path: "AGENTS.md"
+    reason: "Diverges from the kit baseline; carries project-specific content."
+  - path: "tools/validate-project.ps1"
+    reason: "Diverges from the kit baseline; carries project-specific content."
+  - path: "REFERENCES.md"
+    reason: "Diverges from the kit baseline; carries project-specific content."
+
+contributed_back:
+  []
