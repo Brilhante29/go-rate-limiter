@@ -1,10 +1,19 @@
-# #12 go-rate-limiter: 5,543.34 req/s at 28.290 ms p95
+# Distributed Rate Limiter in Go: One Global Token Bucket across Nodes
 
-**Claim:** two HTTP nodes enforce one global token-bucket quota through atomic Redis state.
-
-**Benchmark:** median `5,543.34 req/s` total, `1,197.66 req/s` accepted, `4,347.93 req/s` rejected, and `28.290 ms` p95 across two nodes, with zero errors and zero global-limit violations in three runs.
+**Two HTTP nodes enforce one global quota through atomic Redis state:** median `5,543.34 req/s` total, `1,197.66 req/s` accepted, `4,347.93 req/s` rejected, and `28.290 ms` p95, with zero errors and zero global-limit violations in three runs.
 
 [![CI](https://github.com/Brilhante29/go-rate-limiter/actions/workflows/ci.yml/badge.svg)](https://github.com/Brilhante29/go-rate-limiter/actions/workflows/ci.yml)
+[![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
+![Go](https://img.shields.io/badge/Go-1.26-00ADD8?logo=go&logoColor=white) ![Redis](https://img.shields.io/badge/Redis-8-DC382D?logo=redis&logoColor=white)
+
+## Why this exists
+
+A rate limit that lives in each server's memory is not a limit: with N replicas, a client gets N times the quota, and the number changes every time the deployment scales. A shared counter fixes that only if the read-modify-write is atomic and clock skew between nodes cannot mint tokens. This limiter makes the global guarantee testable:
+
+- one Lua script refills and consumes tokens atomically, using **Redis server time** instead of node clocks;
+- the benchmark drives two independently addressed nodes and fails if accepted traffic ever exceeds the theoretical global maximum (burst plus refill);
+- store failures return `503` and fail closed;
+- the limiter core imports neither chi nor go-redis, and an in-memory adapter keeps unit tests deterministic.
 
 ## What It Proves
 
@@ -16,7 +25,7 @@
 
 ## Run With Docker
 
-```powershell
+```bash
 docker build -t go-rate-limiter .
 docker run --rm go-rate-limiter
 ```
@@ -139,6 +148,23 @@ The Docker build also compiles and tests the Go code, so the default path does n
 - Redis availability is outside the limiter's responsibility; store failures return `503` and fail closed.
 - The baseline uses one Redis instance. Cluster and failover semantics need separate failure benchmarks before being claimed.
 
-## References
+## How this repository is built
 
-See `REFERENCES.md` for official documentation, licenses, and organizational references.
+The project follows the spec-driven workflow of [portfolio-reuse-kit](https://github.com/Brilhante29/portfolio-reuse-kit). Requirements and decisions live in [`sdd/`](sdd) and [`openspec/`](openspec), and [`project.yaml`](project.yaml) records the architecture, stack, and rejected alternatives. Development is AI-assisted and human-governed: [`AGENTS.md`](AGENTS.md) and [`CLAUDE.md`](CLAUDE.md) hold the coding-agent instructions, while tests, validators, and CI decide what gets published.
+
+## Related work
+
+- [api-gateway-lite](https://github.com/Brilhante29/api-gateway-lite): API-key authentication and quotas at the edge, with trace propagation.
+- [load-test-suite](https://github.com/Brilhante29/load-test-suite): reusable k6 latency curves.
+- [cache-strategies-bench](https://github.com/Brilhante29/cache-strategies-bench): Redis on the read path instead of the decision path.
+
+See [`REFERENCES.md`](REFERENCES.md) for official documentation, licenses, and organizational references.
+
+## Author
+
+**Guilherme Brilhante**, software engineer working on scalable backends and production AI.
+[LinkedIn](https://www.linkedin.com/in/guilhermefreirebrilhanteseveriano/) · [GitHub](https://github.com/Brilhante29) · [Publications](https://dblp.org/pid/353/6812.html)
+
+## License
+
+[MIT](LICENSE).
